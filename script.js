@@ -1,5 +1,5 @@
 (function() {
-    const supabaseApi = window.POS_SUPABASE;
+    const supabaseApi = window.POS_SUPABASE || {};
 
     // Example Supabase setup:
     // window.POS_SUPABASE.setConfig({
@@ -8,6 +8,15 @@
     //     anonKey: 'your-anon-key',
     //     tableName: 'profiles'
     // });
+
+    const authMode = {
+        local: 'local',
+        supabase: 'supabase'
+    };
+
+    function getAuthMode() {
+        return isSupabaseReady() ? authMode.supabase : authMode.local;
+    }
 
     function isSupabaseReady() {
         return !!(supabaseApi && typeof supabaseApi.isConfigured === 'function' && supabaseApi.isConfigured());
@@ -400,7 +409,7 @@
         btn.disabled = true;
 
         try {
-            if (isSupabaseReady()) {
+            if (getAuthMode() === authMode.supabase) {
                 const { data, error } = await signInWithSupabase(email, password);
                 if (error) {
                     throw error;
@@ -466,7 +475,7 @@
         btn.disabled = true;
 
         try {
-            if (isSupabaseReady()) {
+            if (getAuthMode() === authMode.supabase) {
                 const { data, error } = await signUpWithSupabase({ fullName: name, email, password, role });
                 if (error) {
                     throw error;
@@ -520,7 +529,7 @@
         btn.disabled = true;
 
         try {
-            if (isSupabaseReady()) {
+            if (getAuthMode() === authMode.supabase) {
                 const { error } = await resetPasswordWithSupabase(email);
                 if (error) {
                     throw error;

@@ -6,6 +6,10 @@ window.POS_SUPABASE = (() => {
         tableName: 'profiles'
     };
 
+    const state = {
+        config: { ...DEFAULT_CONFIG }
+    };
+
     function isPlaceholder(value) {
         return !value || value.includes('your-project') || value.includes('your-anon-key') || value.includes('your-');
     }
@@ -18,10 +22,13 @@ window.POS_SUPABASE = (() => {
         };
     }
 
-    let config = normalizeConfig();
-
     function setConfig(customConfig = {}) {
-        config = normalizeConfig(customConfig);
+        state.config = normalizeConfig(customConfig);
+        return state.config;
+    }
+
+    function getConfig() {
+        return { ...state.config };
     }
 
     function getClient() {
@@ -30,11 +37,11 @@ window.POS_SUPABASE = (() => {
             return null;
         }
 
-        if (!config.enabled) {
+        if (!state.config.enabled) {
             return null;
         }
 
-        return window.supabase.createClient(config.url, config.anonKey, {
+        return window.supabase.createClient(state.config.url, state.config.anonKey, {
             auth: {
                 persistSession: true,
                 autoRefreshToken: true,
@@ -53,7 +60,7 @@ window.POS_SUPABASE = (() => {
             return { data: null, error: new Error('Supabase is not configured.') };
         }
 
-        return client.from(config.tableName).upsert(profileData, { onConflict: 'id' });
+        return client.from(state.config.tableName).upsert(profileData, { onConflict: 'id' });
     }
 
     async function signUpUser({ fullName, email, password, role = 'cashier' }) {
@@ -116,16 +123,12 @@ window.POS_SUPABASE = (() => {
             return { data: [], error: new Error('Supabase is not configured.') };
         }
 
-        return client.from(config.tableName).select('*');
-    }
-
-    function getConfig() {
-        return { ...config };
+        return client.from(state.config.tableName).select('*');
     }
 
     return {
-        config,
         DEFAULT_CONFIG,
+        config: state.config,
         setConfig,
         getConfig,
         getClient,
