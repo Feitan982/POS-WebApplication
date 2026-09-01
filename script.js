@@ -1,4 +1,44 @@
 (function() {
+    const supabaseApi = window.POS_SUPABASE;
+
+    // Example Supabase setup:
+    // window.POS_SUPABASE.setConfig({
+    //     enabled: true,
+    //     url: 'https://your-project-ref.supabase.co',
+    //     anonKey: 'your-anon-key',
+    //     tableName: 'profiles'
+    // });
+
+    function isSupabaseReady() {
+        return !!(supabaseApi && typeof supabaseApi.isConfigured === 'function' && supabaseApi.isConfigured());
+    }
+
+    async function signInWithSupabase(email, password) {
+        if (!isSupabaseReady()) {
+            return { data: null, error: new Error('Supabase is not configured.') };
+        }
+
+        return supabaseApi.signInUser({ email, password });
+    }
+
+    async function signUpWithSupabase({ fullName, email, password, role }) {
+        if (!isSupabaseReady()) {
+            return { data: null, error: new Error('Supabase is not configured.') };
+        }
+
+        return supabaseApi.signUpUser({ fullName, email, password, role });
+    }
+
+    async function resetPasswordWithSupabase(email) {
+        if (!isSupabaseReady()) {
+            return { data: null, error: new Error('Supabase is not configured.') };
+        }
+
+        return supabaseApi.getClient().auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin || window.location.href
+        });
+    }
+
     // ---------- RESPONSIVE DETECTION ----------
     const isMobile = () => window.innerWidth < 768;
     const isTablet = () => window.innerWidth >= 768 && window.innerWidth < 1024;
@@ -358,22 +398,38 @@
         const btn = document.getElementById('signinSubmitBtn');
         btn.classList.add('loading');
         btn.disabled = true;
-        
-        await new Promise(r => setTimeout(r, 800));
-        btn.classList.remove('loading');
-        btn.disabled = false;
 
-        const user = findUserByEmail(email);
-        if (user && user.password === password) {
-            if (user.role === selectedRole) {
-                showToast(`Welcome back, ${user.name}! Redirecting...`, 'success');
-            } else {
-                showToast(`Login successful — but your account is ${user.role}.`, 'error');
+        try {
+            if (isSupabaseReady()) {
+                const { data, error } = await signInWithSupabase(email, password);
+                if (error) {
+                    throw error;
+                }
+
+                const userMeta = data?.user?.user_metadata || {};
+                showToast(`Welcome back, ${userMeta.full_name || userMeta.name || 'User'}! Redirecting...`, 'success');
+                return;
             }
-        } else if (user) {
-            showToast('Incorrect password.', 'error');
-        } else {
-            showToast('No account found with this email.', 'error');
+
+            await new Promise(r => setTimeout(r, 800));
+            const user = findUserByEmail(email);
+            if (user && user.password === password) {
+                if (user.role === selectedRole) {
+                    showToast(`Welcome back, ${user.name}! Redirecting...`, 'success');
+                } else {
+                    showToast(`Login successful — but your account is ${user.role}.`, 'error');
+                }
+            } else if (user) {
+                showToast('Incorrect password.', 'error');
+            } else {
+                showToast('No account found with this email.', 'error');
+            }
+        } catch (error) {
+            const message = error?.message || 'Unable to sign in.';
+            showToast(message, 'error');
+        } finally {
+            btn.classList.remove('loading');
+            btn.disabled = false;
         }
     });
 
@@ -408,21 +464,43 @@
         const btn = document.getElementById('signupSubmitBtn');
         btn.classList.add('loading');
         btn.disabled = true;
-        
-        await new Promise(r => setTimeout(r, 800));
-        btn.classList.remove('loading');
-        btn.disabled = false;
 
-        addUser({ name, email, password, role });
-        updateSystemStatus();
-        showToast(`Account created for ${name} (${role})!`, 'success');
-        document.getElementById('signinEmail').value = email;
-        document.getElementById('signinPassword').value = '';
-        showView(signinView);
-        roleOptions.forEach(o => {
-            o.classList.toggle('active', o.dataset.role === role);
-        });
-        selectedRole = role;
+        try {
+            if (isSupabaseReady()) {
+                const { data, error } = await signUpWithSupabase({ fullName: name, email, password, role });
+                if (error) {
+                    throw error;
+                }
+
+                showToast(`Account created for ${name} (${role})!`, 'success');
+                document.getElementById('signinEmail').value = email;
+                document.getElementById('signinPassword').value = '';
+                showView(signinView);
+                roleOptions.forEach(o => {
+                    o.classList.toggle('active', o.dataset.role === role);
+                });
+                selectedRole = role;
+                return;
+            }
+
+            await new Promise(r => setTimeout(r, 800));
+            addUser({ name, email, password, role });
+            updateSystemStatus();
+            showToast(`Account created for ${name} (${role})!`, 'success');
+            document.getElementById('signinEmail').value = email;
+            document.getElementById('signinPassword').value = '';
+            showView(signinView);
+            roleOptions.forEach(o => {
+                o.classList.toggle('active', o.dataset.role === role);
+            });
+            selectedRole = role;
+        } catch (error) {
+            const message = error?.message || 'Unable to create account.';
+            showToast(message, 'error');
+        } finally {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
     });
 
     // ---------- FORGOT PASSWORD ----------
@@ -440,25 +518,49 @@
         const btn = document.getElementById('forgotSubmitBtn');
         btn.classList.add('loading');
         btn.disabled = true;
-        
-        await new Promise(r => setTimeout(r, 800));
-        btn.classList.remove('loading');
-        btn.disabled = false;
 
-        const user = findUserByEmail(email);
-        const infoBox = document.getElementById('forgotInfoBox');
-        const infoText = document.getElementById('forgotInfoText');
+        try {
+            if (isSupabaseReady()) {
+                const { error } = await resetPasswordWithSupabase(email);
+                if (error) {
+                    throw error;
+                }
 
-        if (user) {
-            infoBox.style.display = 'flex';
-            infoBox.className = 'alert-box success';
-            infoText.textContent = `Reset link sent to ${user.email}. Check your inbox.`;
-            showToast('Password reset link sent!', 'success');
-        } else {
+                const infoBox = document.getElementById('forgotInfoBox');
+                const infoText = document.getElementById('forgotInfoText');
+                infoBox.style.display = 'flex';
+                infoBox.className = 'alert-box success';
+                infoText.textContent = `Reset link sent to ${email}. Check your inbox.`;
+                showToast('Password reset link sent!', 'success');
+                return;
+            }
+
+            await new Promise(r => setTimeout(r, 800));
+            const user = findUserByEmail(email);
+            const infoBox = document.getElementById('forgotInfoBox');
+            const infoText = document.getElementById('forgotInfoText');
+
+            if (user) {
+                infoBox.style.display = 'flex';
+                infoBox.className = 'alert-box success';
+                infoText.textContent = `Reset link sent to ${user.email}. Check your inbox.`;
+                showToast('Password reset link sent!', 'success');
+            } else {
+                infoBox.style.display = 'flex';
+                infoBox.className = 'alert-box error';
+                infoText.textContent = `No account found with ${email}.`;
+                showToast('No account found with this email', 'error');
+            }
+        } catch (error) {
+            const infoBox = document.getElementById('forgotInfoBox');
+            const infoText = document.getElementById('forgotInfoText');
             infoBox.style.display = 'flex';
             infoBox.className = 'alert-box error';
-            infoText.textContent = `No account found with ${email}.`;
-            showToast('No account found with this email', 'error');
+            infoText.textContent = error?.message || 'Unable to reset password.';
+            showToast(error?.message || 'Unable to reset password.', 'error');
+        } finally {
+            btn.classList.remove('loading');
+            btn.disabled = false;
         }
     });
 
