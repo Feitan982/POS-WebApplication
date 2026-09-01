@@ -65,8 +65,6 @@
 
     // ---------- USER DATABASE (localStorage) ----------
     const USERS_KEY = 'pos_users_pro_v2';
-    const CLIENT_LOGO_KEY = 'pos_client_logo';
-    const GROUP_LOGO_KEY = 'pos_group_logo';
     
     function getUsers() {
         try {
@@ -101,79 +99,6 @@
         const users = getUsers();
         users.push(user);
         saveUsers(users);
-    }
-
-    // ---------- LOGO UPLOAD FUNCTIONS ----------
-    function loadSavedLogos() {
-        // Load client logo
-        const savedClientLogo = localStorage.getItem(CLIENT_LOGO_KEY);
-        if (savedClientLogo) {
-            const clientLogoImg = document.getElementById('clientLogoImg');
-            const clientLogoPlaceholder = document.getElementById('clientLogoPlaceholder');
-            clientLogoImg.src = savedClientLogo;
-            clientLogoImg.style.display = 'block';
-            clientLogoPlaceholder.style.display = 'none';
-        }
-
-        // Load group logo
-        const savedGroupLogo = localStorage.getItem(GROUP_LOGO_KEY);
-        if (savedGroupLogo) {
-            const groupLogoImg = document.getElementById('groupLogoImg');
-            const groupLogoPlaceholder = document.getElementById('groupLogoPlaceholder');
-            groupLogoImg.src = savedGroupLogo;
-            groupLogoImg.style.display = 'block';
-            groupLogoPlaceholder.style.display = 'none';
-        }
-    }
-
-    function handleClientLogoUpload(file) {
-        if (!file) return;
-        if (!file.type.startsWith('image/')) {
-            showToast('Please select an image file', 'error');
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            showToast('Image size should be less than 5MB', 'error');
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const imageData = e.target.result;
-            localStorage.setItem(CLIENT_LOGO_KEY, imageData);
-            const clientLogoImg = document.getElementById('clientLogoImg');
-            const clientLogoPlaceholder = document.getElementById('clientLogoPlaceholder');
-            clientLogoImg.src = imageData;
-            clientLogoImg.style.display = 'block';
-            clientLogoPlaceholder.style.display = 'none';
-            showToast('Client logo updated successfully!', 'success');
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function handleGroupLogoUpload(file) {
-        if (!file) return;
-        if (!file.type.startsWith('image/')) {
-            showToast('Please select an image file', 'error');
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            showToast('Image size should be less than 5MB', 'error');
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const imageData = e.target.result;
-            localStorage.setItem(GROUP_LOGO_KEY, imageData);
-            const groupLogoImg = document.getElementById('groupLogoImg');
-            const groupLogoPlaceholder = document.getElementById('groupLogoPlaceholder');
-            groupLogoImg.src = imageData;
-            groupLogoImg.style.display = 'block';
-            groupLogoPlaceholder.style.display = 'none';
-            showToast('Group logo updated successfully!', 'success');
-        };
-        reader.readAsDataURL(file);
     }
 
     // ---------- DOM ELEMENTS ----------
@@ -541,8 +466,7 @@
     // ---------- INIT ----------
     function init() {
         updateSystemStatus();
-        loadSavedLogos();
-        
+
         // Log device type
         if (isDesktop()) {
             console.log('Desktop view initialized');
