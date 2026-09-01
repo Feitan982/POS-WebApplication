@@ -4,81 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS & Inventory System - Secure Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <meta name="description" content="Secure login for a POS and inventory management system.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="bg-gradient" aria-hidden="true"></div>
+    <div class="bg-glow bg-glow-1" aria-hidden="true"></div>
+    <div class="geo-shape geo-shape-1" aria-hidden="true"></div>
 
-    <!-- ===== PROFESSIONAL BACKGROUND ===== -->
-    <div class="bg-gradient"></div>
-    <div class="bg-grid"></div>
-    <div class="bg-glow bg-glow-1"></div>
-    <div class="bg-glow bg-glow-2"></div>
-    <div class="bg-glow bg-glow-3"></div>
-    <div class="geo-shape geo-shape-1"></div>
-    <div class="geo-shape geo-shape-2"></div>
-    <div class="geo-shape geo-shape-3"></div>
-    <div class="bg-noise"></div>
+    <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Hidden file inputs for logo upload -->
-    <input type="file" id="clientLogoInput" class="hidden-file-input" accept="image/*">
-    <input type="file" id="groupLogoInput" class="hidden-file-input" accept="image/*">
-
-    <!-- Main Container - Glassmorphism -->
-    <div class="main-container">
-
-        <!-- LEFT PANEL: Client Logo -->
-        <div class="left-panel">
+    <main class="main-container" aria-label="POS login panel">
+        <aside class="left-panel" aria-label="System overview">
             <div class="client-logo-wrapper">
-                <div class="client-logo-circle" id="clientLogoCircle" title="Click to upload logo">
-                    <i class="fas fa-store logo-placeholder" id="clientLogoPlaceholder"></i>
-                    <img id="clientLogoImg" style="display: none;" alt="Client Logo">
-                </div>
-                <div class="logo-upload-hint" id="clientLogoUploadHint">
-                    <i class="fas fa-camera"></i>
-                    <span>Click to upload logo</span>
+                <div class="client-logo-circle" aria-label="Client logo">
+                    <i class="fas fa-store logo-placeholder"></i>
                 </div>
                 <div class="client-company-name">Client-Logo</div>
                 <div class="client-company-tag">Your Retail Partner</div>
             </div>
-            <div class="divider-line"></div>
-            <div class="system-info">
-                <strong>POS & Inventory System</strong><br>
-                Secure access for admins and cashiers.<br>
-                Streamline your operations with ease.
-            </div>
 
-            <!-- Group Logo Upload -->
-            <div class="group-logo-wrapper" id="groupLogoWrapper" title="Click to upload group logo">
-                <div class="group-logo-thumb">
-                    <i class="fas fa-building logo-placeholder" id="groupLogoPlaceholder"></i>
-                    <img id="groupLogoImg" style="display: none;" alt="Group Logo">
-                </div>
-                <div class="group-logo-text">
-                    Group-Logo
-                    <br>
-                    <small style="font-size: 0.7rem; opacity: 0.7;">Click to upload</small>
-                </div>
+            <div class="divider-line" aria-hidden="true"></div>
+
+            <div class="system-info">
+                <strong>POS &amp; Inventory System</strong>
+                <p>Secure access for admins and cashiers.</p>
+                <p>Streamline your operations with ease.</p>
             </div>
 
             <div class="account-status">
-                <span class="status-dot"></span>
+                <span class="status-dot" aria-hidden="true"></span>
                 <span id="accountStatusText">Checking system status...</span>
             </div>
-        </div>
+        </aside>
 
-        <!-- RIGHT PANEL: Login Form -->
-        <div class="right-panel">
+        <section class="right-panel" aria-label="Authentication area">
             <div class="auth-card">
-
-                <!-- SIGN IN FORM -->
-                <div id="signinView">
+                <div id="signinView" class="view-panel">
                     <div class="auth-header">
-                        <div class="icon-badge">
+                        <div class="icon-badge" aria-hidden="true">
                             <i class="fas fa-lock"></i>
                         </div>
                         <h2>Welcome Back</h2>
@@ -86,19 +54,10 @@
                     </div>
 
                     <form id="signinForm" autocomplete="off" novalidate>
-                        <div class="role-selector" id="signinRoleSelector">
-                            <button type="button" class="role-option active" data-role="admin" id="adminRoleBtn">
-                                <i class="fas fa-user-shield"></i> Admin
-                            </button>
-                            <button type="button" class="role-option" data-role="cashier" id="cashierRoleBtn">
-                                <i class="fas fa-user"></i> Cashier
-                            </button>
-                        </div>
-
                         <div class="form-group">
                             <label for="signinEmail">Email Address</label>
                             <div class="input-wrapper">
-                                <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                                <span class="input-icon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
                                 <input type="email" id="signinEmail" placeholder="your@email.com" required>
                             </div>
                             <span class="error-message" id="signinEmailError"></span>
@@ -107,20 +66,20 @@
                         <div class="form-group">
                             <label for="signinPassword">Password</label>
                             <div class="input-wrapper">
-                                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                <span class="input-icon" aria-hidden="true"><i class="fas fa-lock"></i></span>
                                 <input type="password" id="signinPassword" placeholder="Enter your password" required>
-                                <button type="button" class="toggle-password" data-target="signinPassword">
+                                <button type="button" class="toggle-password" data-target="signinPassword" aria-label="Show password">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
                             <span class="error-message" id="signinPasswordError"></span>
                         </div>
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div class="meta-row">
                             <label class="checkbox-wrapper">
                                 <input type="checkbox" id="rememberMe">
                                 <span class="checkmark"></span>
-                                Remember me
+                                <span>Remember me</span>
                             </label>
                             <button type="button" class="link-btn" id="forgotLink">Forgot Password?</button>
                         </div>
@@ -135,17 +94,16 @@
                             </button>
                         </div>
 
-                        <div style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: var(--text-medium);">
+                        <div class="helper-text">
                             <i class="fas fa-info-circle"></i>
-                            No account yet? Create one to get started.
+                            <span>No account yet? Create one to get started.</span>
                         </div>
                     </form>
                 </div>
 
-                <!-- CREATE ACCOUNT VIEW -->
-                <div id="signupView" style="display: none;">
+                <div id="signupView" class="view-panel" style="display: none;">
                     <div class="auth-header">
-                        <div class="icon-badge">
+                        <div class="icon-badge" aria-hidden="true">
                             <i class="fas fa-user-plus"></i>
                         </div>
                         <h2>Create Account</h2>
@@ -161,7 +119,7 @@
                         <div class="form-group">
                             <label for="signupFullName">Your Name</label>
                             <div class="input-wrapper">
-                                <span class="input-icon"><i class="fas fa-user"></i></span>
+                                <span class="input-icon" aria-hidden="true"><i class="fas fa-user"></i></span>
                                 <input type="text" id="signupFullName" placeholder="Enter your full name" required>
                             </div>
                             <span class="error-message" id="signupFullNameError"></span>
@@ -170,7 +128,7 @@
                         <div class="form-group">
                             <label for="signupEmail">Email Address</label>
                             <div class="input-wrapper">
-                                <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                                <span class="input-icon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
                                 <input type="email" id="signupEmail" placeholder="your@email.com" required>
                             </div>
                             <span class="error-message" id="signupEmailError"></span>
@@ -179,7 +137,7 @@
                         <div class="form-group">
                             <label for="signupRole">Account Role</label>
                             <div class="input-wrapper">
-                                <span class="input-icon"><i class="fas fa-shield"></i></span>
+                                <span class="input-icon" aria-hidden="true"><i class="fas fa-shield"></i></span>
                                 <select id="signupRole" required>
                                     <option value="cashier">Cashier</option>
                                     <option value="admin" id="adminRoleOption">Admin</option>
@@ -191,9 +149,9 @@
                         <div class="form-group">
                             <label for="signupPassword">Create Password</label>
                             <div class="input-wrapper">
-                                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                <span class="input-icon" aria-hidden="true"><i class="fas fa-lock"></i></span>
                                 <input type="password" id="signupPassword" placeholder="Create a strong password" required>
-                                <button type="button" class="toggle-password" data-target="signupPassword">
+                                <button type="button" class="toggle-password" data-target="signupPassword" aria-label="Show password">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
@@ -203,20 +161,20 @@
                         <div class="form-group">
                             <label for="signupConfirmPassword">Confirm Password</label>
                             <div class="input-wrapper">
-                                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                <span class="input-icon" aria-hidden="true"><i class="fas fa-lock"></i></span>
                                 <input type="password" id="signupConfirmPassword" placeholder="Re-enter your password" required>
-                                <button type="button" class="toggle-password" data-target="signupConfirmPassword">
+                                <button type="button" class="toggle-password" data-target="signupConfirmPassword" aria-label="Show password">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
                             <span class="error-message" id="signupConfirmPasswordError"></span>
                         </div>
 
-                        <div style="margin-bottom: 1rem;">
+                        <div class="terms-row">
                             <label class="checkbox-wrapper">
                                 <input type="checkbox" id="agreeTerms" required>
                                 <span class="checkmark"></span>
-                                I agree to the <a href="#" class="link-btn">Terms of Service</a>
+                                <span>I agree to the <a href="#" class="link-btn">Terms of Service</a></span>
                             </label>
                             <span class="error-message" id="termsError"></span>
                         </div>
@@ -233,10 +191,9 @@
                     </form>
                 </div>
 
-                <!-- FORGOT PASSWORD VIEW -->
-                <div id="forgotView" style="display: none;">
+                <div id="forgotView" class="view-panel" style="display: none;">
                     <div class="auth-header">
-                        <div class="icon-badge">
+                        <div class="icon-badge" aria-hidden="true">
                             <i class="fas fa-key"></i>
                         </div>
                         <h2>Forgot Password</h2>
@@ -247,7 +204,7 @@
                         <div class="form-group">
                             <label for="forgotEmail">Email Address</label>
                             <div class="input-wrapper">
-                                <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                                <span class="input-icon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
                                 <input type="email" id="forgotEmail" placeholder="Enter your registered email" required>
                             </div>
                             <span class="error-message" id="forgotEmailError"></span>
@@ -258,9 +215,9 @@
                             <span id="forgotInfoText"></span>
                         </div>
 
-                        <div style="background: rgba(59, 130, 246, 0.1); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: var(--radius-sm); padding: 0.75rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-medium); border: 1px solid rgba(59, 130, 246, 0.2);">
-                            <i class="fas fa-info-circle" style="color: var(--info);"></i>
-                            We'll send a password reset link if the email exists in our system.
+                        <div class="help-note">
+                            <i class="fas fa-info-circle"></i>
+                            <span>We'll send a password reset link if the email exists in our system.</span>
                         </div>
 
                         <div class="button-group">
@@ -275,17 +232,15 @@
                     </form>
                 </div>
 
-                <!-- Security badge -->
-                <div class="security-badge">
+                <div class="security-badge" aria-label="Security status">
                     <i class="fas fa-shield-alt"></i>
                     <span>256-bit SSL Secured</span>
-                    <span>•</span>
+                    <span aria-hidden="true">•</span>
                     <span>PCI DSS Compliant</span>
                 </div>
-
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>

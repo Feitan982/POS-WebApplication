@@ -183,7 +183,6 @@
     const signinForm = document.getElementById('signinForm');
     const signupForm = document.getElementById('signupForm');
     const forgotForm = document.getElementById('forgotForm');
-    const roleOptions = document.querySelectorAll('#signinRoleSelector .role-option');
     const signupRoleSelect = document.getElementById('signupRole');
     const adminRoleOption = document.getElementById('adminRoleOption');
     const signupRoleInfo = document.getElementById('signupRoleInfo');
@@ -279,24 +278,6 @@
     }
 
     // ---------- ROLE SELECTOR ----------
-    roleOptions.forEach(opt => {
-        opt.addEventListener('click', () => {
-            roleOptions.forEach(o => o.classList.remove('active'));
-            opt.classList.add('active');
-            selectedRole = opt.dataset.role;
-        });
-        
-        // Add touch feedback for mobile
-        if (isMobile()) {
-            opt.addEventListener('touchstart', function() {
-                this.style.opacity = '0.8';
-            });
-            opt.addEventListener('touchend', function() {
-                this.style.opacity = '1';
-            });
-        }
-    });
-
     // ---------- PASSWORD TOGGLE ----------
     document.querySelectorAll('.toggle-password').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -339,36 +320,6 @@
     document.getElementById('backToSigninFromForgot').addEventListener('click', () => {
         showView(signinView);
         updateSystemStatus();
-    });
-
-    // ---------- LOGO UPLOAD EVENTS ----------
-    const clientLogoCircle = document.getElementById('clientLogoCircle');
-    const clientLogoUploadHint = document.getElementById('clientLogoUploadHint');
-    const clientLogoInput = document.getElementById('clientLogoInput');
-    const groupLogoWrapper = document.getElementById('groupLogoWrapper');
-    const groupLogoInput = document.getElementById('groupLogoInput');
-
-    clientLogoCircle.addEventListener('click', () => {
-        clientLogoInput.click();
-    });
-    clientLogoUploadHint.addEventListener('click', () => {
-        clientLogoInput.click();
-    });
-    clientLogoInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            handleClientLogoUpload(e.target.files[0]);
-        }
-        e.target.value = '';
-    });
-
-    groupLogoWrapper.addEventListener('click', () => {
-        groupLogoInput.click();
-    });
-    groupLogoInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            handleGroupLogoUpload(e.target.files[0]);
-        }
-        e.target.value = '';
     });
 
     // ---------- VALIDATION ----------
@@ -423,11 +374,7 @@
             await new Promise(r => setTimeout(r, 800));
             const user = findUserByEmail(email);
             if (user && user.password === password) {
-                if (user.role === selectedRole) {
-                    showToast(`Welcome back, ${user.name}! Redirecting...`, 'success');
-                } else {
-                    showToast(`Login successful — but your account is ${user.role}.`, 'error');
-                }
+                showToast(`Welcome back, ${user.name}! Redirecting...`, 'success');
             } else if (user) {
                 showToast('Incorrect password.', 'error');
             } else {
@@ -485,9 +432,6 @@
                 document.getElementById('signinEmail').value = email;
                 document.getElementById('signinPassword').value = '';
                 showView(signinView);
-                roleOptions.forEach(o => {
-                    o.classList.toggle('active', o.dataset.role === role);
-                });
                 selectedRole = role;
                 return;
             }
@@ -499,9 +443,6 @@
             document.getElementById('signinEmail').value = email;
             document.getElementById('signinPassword').value = '';
             showView(signinView);
-            roleOptions.forEach(o => {
-                o.classList.toggle('active', o.dataset.role === role);
-            });
             selectedRole = role;
         } catch (error) {
             const message = error?.message || 'Unable to create account.';
