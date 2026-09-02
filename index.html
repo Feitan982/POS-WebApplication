@@ -18,7 +18,8 @@
 
     <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
-    <main class="main-container" aria-label="POS login panel">
+    <!-- LOGIN VIEW -->
+    <main class="main-container" id="loginContainer" aria-label="POS login panel">
         <aside class="left-panel" aria-label="System overview">
             <div class="client-logo-wrapper">
                 <div class="client-logo-circle" aria-label="Client logo">
@@ -248,6 +249,246 @@
             </div>
         </section>
     </main>
+
+    <!-- DASHBOARD VIEW (Hidden until login) -->
+    <div id="dashboardContainer" style="display: none;">
+        <!-- Top Navigation Bar -->
+        <nav class="dashboard-nav">
+            <div class="nav-left">
+                <div class="nav-logo">
+                    <img src="assets/logo.png" alt="Logo" width="40" height="40">
+                    <span>POS System</span>
+                </div>
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="nav-right">
+                <div class="nav-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <button class="nav-icon" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </button>
+                <div class="user-dropdown">
+                    <button class="user-btn" id="userDropdownBtn">
+                        <img src="https://ui-avatars.com/api/?name=User&background=4F46E5&color=fff" alt="User">
+                        <span id="userDisplayName">User</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu" id="userDropdownMenu">
+                        <div class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </div>
+                        <div class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </div>
+                        <hr>
+                        <div class="dropdown-item logout" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-container">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <nav class="sidebar-nav">
+                    <a href="#" class="sidebar-link active" data-page="overview">
+                        <i class="fas fa-th-large"></i>
+                        <span>Overview</span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-page="pos">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Point of Sale</span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-page="inventory">
+                        <i class="fas fa-boxes"></i>
+                        <span>Inventory</span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-page="orders">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Orders</span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-page="customers">
+                        <i class="fas fa-users"></i>
+                        <span>Customers</span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-page="reports">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-page="settings">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                    <hr>
+                    <a href="#" class="sidebar-link logout-link" id="sidebarLogoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="dashboard-content">
+                <!-- Overview Page -->
+                <div class="page-content active" id="page-overview">
+                    <div class="page-header">
+                        <h1>Dashboard Overview</h1>
+                        <p>Welcome back, <span id="dashboardUserName">User</span>!</p>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>$12,450</h3>
+                                <p>Today's Sales</p>
+                                <span class="stat-change positive">+12.5%</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>84</h3>
+                                <p>Orders Today</p>
+                                <span class="stat-change positive">+8.2%</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>1,284</h3>
+                                <p>Products in Stock</p>
+                                <span class="stat-change negative">-3.1%</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon purple">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>256</h3>
+                                <p>Active Customers</p>
+                                <span class="stat-change positive">+22.4%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="recent-activity">
+                        <div class="activity-header">
+                            <h2>Recent Activity</h2>
+                            <button class="view-all-btn">View All</button>
+                        </div>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon blue">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <p><strong>John Doe</strong> placed an order #1234</p>
+                                    <span class="activity-time">5 minutes ago</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon green">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <p><strong>Inventory</strong> updated - 45 items added</p>
+                                    <span class="activity-time">1 hour ago</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon orange">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <p><strong>New customer</strong> registered: Jane Smith</p>
+                                    <span class="activity-time">3 hours ago</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon purple">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <p><strong>Sales report</strong> generated for June 2026</p>
+                                    <span class="activity-time">5 hours ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <h2>Quick Actions</h2>
+                        <div class="actions-grid">
+                            <button class="action-btn">
+                                <i class="fas fa-plus-circle"></i>
+                                New Order
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-plus"></i>
+                                Add Product
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-file-invoice"></i>
+                                Generate Report
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-users-cog"></i>
+                                Manage Users
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other Pages (Placeholders) -->
+                <div class="page-content" id="page-pos">
+                    <h1>Point of Sale</h1>
+                    <p>POS functionality coming soon...</p>
+                </div>
+                <div class="page-content" id="page-inventory">
+                    <h1>Inventory Management</h1>
+                    <p>Inventory management coming soon...</p>
+                </div>
+                <div class="page-content" id="page-orders">
+                    <h1>Orders</h1>
+                    <p>Order management coming soon...</p>
+                </div>
+                <div class="page-content" id="page-customers">
+                    <h1>Customers</h1>
+                    <p>Customer management coming soon...</p>
+                </div>
+                <div class="page-content" id="page-reports">
+                    <h1>Reports</h1>
+                    <p>Analytics and reports coming soon...</p>
+                </div>
+                <div class="page-content" id="page-settings">
+                    <h1>Settings</h1>
+                    <p>System settings coming soon...</p>
+                </div>
+            </main>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
