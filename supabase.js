@@ -1,8 +1,8 @@
 window.POS_SUPABASE = (() => {
     const DEFAULT_CONFIG = {
         enabled: false,
-        url: 'https://your-project-ref.supabase.co',
-        anonKey: 'your-anon-key',
+        url: 'https://itsjyzlquevohkoqufmw.supabase.co',
+        anonKey: 'sb_publishable_8877cuPp8cnywtpnR_HHeA_9_d0gxNA',
         tableName: 'profiles'
     };
 
