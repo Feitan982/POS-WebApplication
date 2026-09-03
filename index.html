@@ -18,6 +18,23 @@
 
     <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
+    <div class="modal-overlay" id="emailConfirmationModal" role="dialog" aria-modal="true" aria-labelledby="emailConfirmationTitle" aria-describedby="emailConfirmationMessage" hidden>
+        <div class="modal-card">
+            <button type="button" class="modal-close" id="emailConfirmationClose" aria-label="Close confirmation message">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-icon" aria-hidden="true">
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+            <h2 id="emailConfirmationTitle">Check your email</h2>
+            <p id="emailConfirmationMessage">We sent a confirmation link to your email address. Confirm your account before signing in.</p>
+            <p class="modal-email" id="emailConfirmationAddress"></p>
+            <button type="button" class="submit-btn" id="emailConfirmationContinue">
+                <i class="fas fa-arrow-right"></i> Continue to Sign In
+            </button>
+        </div>
+    </div>
+
     <!-- LOGIN VIEW -->
     <main class="main-container" id="loginContainer" aria-label="POS login panel">
         <aside class="left-panel" aria-label="System overview">

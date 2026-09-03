@@ -117,6 +117,95 @@ body {
     }
 }
 
+/* ===== EMAIL CONFIRMATION MODAL ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(2, 6, 23, 0.78);
+    backdrop-filter: blur(8px);
+}
+
+.modal-overlay[hidden] {
+    display: none;
+}
+
+.modal-card {
+    position: relative;
+    width: min(100%, 440px);
+    padding: 36px 32px 32px;
+    text-align: center;
+    background: #1e293b;
+    color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+    animation: modalIn 0.25s ease;
+}
+
+.modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.modal-close:hover,
+.modal-close:focus-visible {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
+}
+
+.modal-icon {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.14);
+    color: #4ade80;
+    font-size: 28px;
+}
+
+.modal-card h2 {
+    margin-bottom: 10px;
+    color: #f8fafc;
+    font-size: 24px;
+}
+
+.modal-card p {
+    color: #cbd5e1;
+    line-height: 1.6;
+}
+
+.modal-email {
+    margin: 14px 0 24px;
+    color: #f8fafc !important;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.modal-card .submit-btn {
+    width: 100%;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* ===== LOGIN CONTAINER ===== */
 .main-container {
     display: flex;
