@@ -491,20 +491,26 @@
                                 <input type="text" placeholder="Search products...">
                             </div>
                             <div class="pos-product-grid">
-                                <!-- Products will be loaded here -->
-                                <p>POS functionality coming soon...</p>
+                                <p style="color: #94a3b8; text-align: center; padding: 3rem;">
+                                    <i class="fas fa-shopping-cart" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
+                                    POS functionality coming soon...
+                                </p>
                             </div>
                         </div>
                         <div class="pos-cart">
                             <h3>Current Sale</h3>
                             <div class="cart-items">
-                                <!-- Cart items will appear here -->
+                                <p style="color: #94a3b8; text-align: center; padding: 2rem;">
+                                    No items in cart
+                                </p>
                             </div>
                             <div class="cart-total">
                                 <span>Total:</span>
                                 <strong>$0.00</strong>
                             </div>
-                            <button class="submit-btn">Complete Sale</button>
+                            <button class="submit-btn">
+                                <i class="fas fa-check-circle"></i> Complete Sale
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -672,8 +678,8 @@
                                 <tbody>
                                     <tr>
                                         <td colspan="7" style="text-align: center; padding: 3rem;">
-                                            <i class="fas fa-clipboard-list" style="font-size: 3rem; color: #cbd5e0;"></i>
-                                            <p style="margin-top: 1rem; color: #718096;">No orders yet</p>
+                                            <i class="fas fa-clipboard-list" style="font-size: 3rem; color: #cbd5e0; display: block; margin-bottom: 1rem;"></i>
+                                            <p style="color: #718096;">No orders yet</p>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -713,8 +719,8 @@
                                 <tbody>
                                     <tr>
                                         <td colspan="6" style="text-align: center; padding: 3rem;">
-                                            <i class="fas fa-users" style="font-size: 3rem; color: #cbd5e0;"></i>
-                                            <p style="margin-top: 1rem; color: #718096;">No customers yet</p>
+                                            <i class="fas fa-users" style="font-size: 3rem; color: #cbd5e0; display: block; margin-bottom: 1rem;"></i>
+                                            <p style="color: #718096;">No customers yet</p>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -864,4 +870,47 @@
                     </div>
                     <div class="form-group">
                         <label for="productLocation">Storage Location</label>
-                        <
+                        <input type="text" id="productLocation" placeholder="e.g., Aisle 3, Shelf B">
+                    </div>
+                    <div class="form-group">
+                        <label for="productDescription">Description</label>
+                        <textarea id="productDescription" rows="3" placeholder="Product description..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="secondary-btn" id="cancelProductBtn">Cancel</button>
+                    <button type="submit" class="submit-btn" id="saveProductBtn">
+                        <i class="fas fa-save"></i> Save Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Delete Product</h2>
+                <button class="modal-close-btn" id="closeDeleteModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p style="color: #94a3b8; margin-bottom: 1rem;">
+                Are you sure you want to delete this product? This action cannot be undone.
+            </p>
+            <p id="deleteProductName" style="font-weight: 600; color: #f1f5f9; margin-bottom: 1.5rem;"></p>
+            <div class="modal-actions">
+                <button type="button" class="secondary-btn" id="cancelDeleteBtn">Cancel</button>
+                <button type="button" class="submit-btn" id="confirmDeleteBtn" style="background: #ef4444;">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
