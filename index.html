@@ -634,9 +634,9 @@
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <body id="inventoryTableBody">
+                                <tbody id="inventoryTableBody">
                                     <!-- Products will be loaded here -->
-                                </body>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -768,69 +768,7 @@
                         </div>
                     </div>
                 </div>
-<!-- Audit Trail Modal -->
-<div class="modal" id="auditLogModal">
-    <div class="modal-content" style="max-width: 900px;">
-        <div class="modal-header">
-            <h2>Audit Trail & System Logs</h2>
-            <button class="modal-close-btn" id="closeAuditLogModal">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="audit-filters">
-            <select id="auditActionFilter" class="filter-select">
-                <option value="">All Actions</option>
-                <option value="create">Create</option>
-                <option value="update">Update</option>
-                <option value="delete">Delete</option>
-                <option value="login">Login</option>
-                <option value="logout">Logout</option>
-                <option value="export">Export</option>
-                <option value="view">View</option>
-            </select>
-            <select id="auditModuleFilter" class="filter-select">
-                <option value="">All Modules</option>
-                <option value="auth">Authentication</option>
-                <option value="inventory">Inventory</option>
-                <option value="pos">Point of Sale</option>
-                <option value="orders">Orders</option>
-                <option value="customers">Customers</option>
-                <option value="reports">Reports</option>
-                <option value="settings">Settings</option>
-            </select>
-            <input type="date" id="auditDateFilter" class="filter-select">
-            <button class="secondary-btn" id="clearAuditFilters">
-                <i class="fas fa-times"></i> Clear Filters
-            </button>
-        </div>
-        <div class="audit-table-container" style="max-height: 500px; overflow-y: auto;">
-            <table class="inventory-table" id="auditLogTable">
-                <thead>
-                    <tr>
-                        <th>Timestamp</th>
-                        <th>User</th>
-                        <th>Action</th>
-                        <th>Module</th>
-                        <th>Description</th>
-                        <th>IP Address</th>
-                    </tr>
-                </thead>
-                <tbody id="auditLogTableBody">
-                    <!-- Audit logs will be loaded here -->
-                </tbody>
-            </table>
-        </div>
-        <div class="pagination" id="auditPagination"></div>
-    </div>
-</div>
-
-<!-- Add this to your sidebar navigation -->
-<a href="#" class="sidebar-link" data-page="audit">
-    <i class="fas fa-history"></i>
-    <span>Audit Trail</span>
-</a>
-
-<!-- Add this page content -->
+<!-- Audit Trail Page -->
 <div class="page-content" id="page-audit">
     <div class="page-header">
         <h1>Audit Trail & System Logs</h1>
@@ -891,6 +829,35 @@
                 <i class="fas fa-trash"></i> Clear All Logs
             </button>
         </div>
+    </div>
+
+    <!-- Audit Filters -->
+    <div class="audit-filters" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <select id="auditActionFilter" class="filter-select">
+            <option value="">All Actions</option>
+            <option value="create">Create</option>
+            <option value="update">Update</option>
+            <option value="delete">Delete</option>
+            <option value="login">Login</option>
+            <option value="logout">Logout</option>
+            <option value="export">Export</option>
+            <option value="view">View</option>
+        </select>
+        <select id="auditModuleFilter" class="filter-select">
+            <option value="">All Modules</option>
+            <option value="auth">Authentication</option>
+            <option value="inventory">Inventory</option>
+            <option value="pos">Point of Sale</option>
+            <option value="orders">Orders</option>
+            <option value="customers">Customers</option>
+            <option value="reports">Reports</option>
+            <option value="settings">Settings</option>
+            <option value="audit">Audit Trail</option>
+        </select>
+        <input type="date" id="auditDateFilter" class="filter-select">
+        <button class="secondary-btn" id="clearAuditFilters">
+            <i class="fas fa-times"></i> Clear Filters
+        </button>
     </div>
 
     <!-- Audit Table -->
