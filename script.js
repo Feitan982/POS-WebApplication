@@ -682,10 +682,30 @@
             const target = document.getElementById(`page-${page}`);
             if (target) target.classList.add('active');
             
+            // Initialize inventory if navigating to inventory page
+            if (page === 'inventory') {
+                initInventory();
+            }
+            
             // Close mobile sidebar
             if (sidebar) sidebar.classList.remove('open');
         });
     });
+
+    // ---------- NAVIGATION FUNCTION ----------
+    window.navigateToPage = function(page) {
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        const sidebarLink = document.querySelector(`.sidebar-link[data-page="${page}"]`);
+        if (sidebarLink) sidebarLink.classList.add('active');
+        
+        document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+        const target = document.getElementById(`page-${page}`);
+        if (target) target.classList.add('active');
+        
+        if (page === 'inventory') {
+            initInventory();
+        }
+    };
 
     // ---------- ROLE CHANGE ----------
     if (signupRoleSelect) {
@@ -705,6 +725,587 @@
                 }
             }
         });
+    }
+
+    // ==================== INVENTORY MANAGEMENT ====================
+    
+    // Inventory State
+    let inventoryState = {
+        products: [],
+        filteredProducts: [],
+        currentPage: 1,
+        itemsPerPage: 10,
+        searchTerm: '',
+        categoryFilter: '',
+        stockFilter: '',
+        editingProductId: null,
+        deletingProductId: null
+    };
+
+    // Sample inventory data
+    const sampleProducts = [
+        {
+            id: 1,
+            name: 'Power Drill',
+            sku: 'PRD-001',
+            category: 'tools',
+            price: 89.99,
+            quantity: 25,
+            minStock: 10,
+            supplier: 'ToolMaster Inc.',
+            location: 'Aisle 1, Shelf A',
+            description: 'Professional power drill with variable speed',
+            lastUpdated: '2026-09-01'
+        },
+        {
+            id: 2,
+            name: 'Hammer',
+            sku: 'PRD-002',
+            category: 'tools',
+            price: 15.99,
+            quantity: 50,
+            minStock: 20,
+            supplier: 'Hardware Supply Co.',
+            location: 'Aisle 1, Shelf B',
+            description: '16 oz claw hammer with fiberglass handle',
+            lastUpdated: '2026-08-28'
+        },
+        {
+            id: 3,
+            name: 'Screwdriver Set',
+            sku: 'PRD-003',
+            category: 'tools',
+            price: 24.99,
+            quantity: 8,
+            minStock: 15,
+            supplier: 'ToolMaster Inc.',
+            location: 'Aisle 2, Shelf A',
+            description: '6-piece screwdriver set with magnetic tips',
+            lastUpdated: '2026-09-02'
+        },
+        {
+            id: 4,
+            name: 'Paint Brush Set',
+            sku: 'PRD-004',
+            category: 'paint',
+            price: 12.99,
+            quantity: 0,
+            minStock: 10,
+            supplier: 'PaintPro Supplies',
+            location: 'Aisle 5, Shelf C',
+            description: '5-piece paint brush set for all paint types',
+            lastUpdated: '2026-08-25'
+        },
+        {
+            id: 5,
+            name: 'Safety Goggles',
+            sku: 'PRD-005',
+            category: 'safety',
+            price: 8.99,
+            quantity: 75,
+            minStock: 30,
+            supplier: 'SafetyFirst Gear',
+            location: 'Aisle 3, Shelf D',
+            description: 'Anti-fog safety goggles with UV protection',
+            lastUpdated: '2026-08-30'
+        }
+    ];
+
+    // Initialize Inventory
+    function initInventory() {
+        // Load products from localStorage or use sample data
+        const savedProducts = localStorage.getItem('inventoryProducts');
+        if (savedProducts) {
+            inventoryState.products = JSON.parse(savedProducts);
+        } else {
+            inventoryState.products = [...sampleProducts];
+            saveProducts();
+        }
+        
+        updateInventoryStats();
+        filterProducts();
+        setupInventoryEventListeners();
+    }
+
+    // Save products to localStorage
+    function saveProducts() {
+        localStorage.setItem('inventoryProducts', JSON.stringify(inventoryState.products));
+    }
+
+    // Update inventory statistics
+    function updateInventoryStats() {
+        const totalProductsEl = document.getElementById('totalProducts');
+        const inStockProductsEl = document.getElementById('inStockProducts');
+        const lowStockProductsEl = document.getElementById('lowStockProducts');
+        const outOfStockProductsEl = document.getElementById('outOfStockProducts');
+        
+        if (!totalProductsEl) return;
+        
+        const total = inventoryState.products.length;
+        const inStock = inventoryState.products.filter(p => p.quantity > p.minStock).length;
+        const lowStock = inventoryState.products.filter(p => p.quantity > 0 && p.quantity <= p.minStock).length;
+        const outOfStock = inventoryState.products.filter(p => p.quantity === 0).length;
+        
+        totalProductsEl.textContent = total;
+        inStockProductsEl.textContent = inStock;
+        lowStockProductsEl.textContent = lowStock;
+        outOfStockProductsEl.textContent = outOfStock;
+    }
+
+    // Get stock status
+    function getStockStatus(quantity, minStock) {
+        if (quantity === 0) return 'out_of_stock';
+        if (quantity <= minStock) return 'low_stock';
+        if (quantity > minStock * 2) return 'over_stock';
+        return 'in_stock';
+    }
+
+    // Get stock badge HTML
+    function getStockBadge(status) {
+        const badges = {
+            'in_stock': '<span class="stock-badge in-stock"><i class="fas fa-check-circle"></i> In Stock</span>',
+            'low_stock': '<span class="stock-badge low-stock"><i class="fas fa-exclamation-triangle"></i> Low Stock</span>',
+            'out_of_stock': '<span class="stock-badge out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</span>',
+            'over_stock': '<span class="stock-badge over-stock"><i class="fas fa-arrow-up"></i> Over Stocked</span>'
+        };
+        return badges[status] || badges.in_stock;
+    }
+
+    // Filter products based on search and filters
+    function filterProducts() {
+        const { searchTerm, categoryFilter, stockFilter } = inventoryState;
+        
+        inventoryState.filteredProducts = inventoryState.products.filter(product => {
+            // Search filter
+            if (searchTerm) {
+                const searchLower = searchTerm.toLowerCase();
+                const matchesSearch = 
+                    product.name.toLowerCase().includes(searchLower) ||
+                    product.sku.toLowerCase().includes(searchLower) ||
+                    (product.supplier && product.supplier.toLowerCase().includes(searchLower));
+                if (!matchesSearch) return false;
+            }
+            
+            // Category filter
+            if (categoryFilter && product.category !== categoryFilter) {
+                return false;
+            }
+            
+            // Stock filter
+            if (stockFilter) {
+                const status = getStockStatus(product.quantity, product.minStock);
+                if (status !== stockFilter) return false;
+            }
+            
+            return true;
+        });
+        
+        inventoryState.currentPage = 1;
+        renderInventoryTable();
+        renderPagination();
+    }
+
+    // Render inventory table
+    function renderInventoryTable() {
+        const tbody = document.getElementById('inventoryTableBody');
+        const table = document.getElementById('inventoryTable');
+        const emptyState = document.getElementById('inventoryEmpty');
+        const loadingSpinner = document.getElementById('inventoryLoading');
+        
+        if (!tbody) return;
+        
+        // Show loading spinner
+        if (loadingSpinner) loadingSpinner.style.display = 'block';
+        if (table) table.style.display = 'none';
+        
+        setTimeout(() => {
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
+            
+            if (inventoryState.filteredProducts.length === 0) {
+                if (table) table.style.display = 'none';
+                if (emptyState) emptyState.style.display = 'block';
+                return;
+            }
+            
+            if (emptyState) emptyState.style.display = 'none';
+            if (table) table.style.display = 'table';
+            
+            // Calculate pagination
+            const startIndex = (inventoryState.currentPage - 1) * inventoryState.itemsPerPage;
+            const endIndex = Math.min(startIndex + inventoryState.itemsPerPage, inventoryState.filteredProducts.length);
+            const pageProducts = inventoryState.filteredProducts.slice(startIndex, endIndex);
+            
+            const categoryIcons = {
+                'tools': '🔧',
+                'hardware': '🔩',
+                'electrical': '⚡',
+                'plumbing': '🔧',
+                'paint': '🎨',
+                'garden': '🌿',
+                'building': '🏗️',
+                'fasteners': '🔗',
+                'safety': '🛡️'
+            };
+            
+            tbody.innerHTML = pageProducts.map(product => {
+                const status = getStockStatus(product.quantity, product.minStock);
+                
+                return `
+                    <tr>
+                        <td>
+                            <div class="product-info">
+                                <div class="product-image">${categoryIcons[product.category] || '📦'}</div>
+                                <div class="product-details">
+                                    <p class="product-name">${product.name}</p>
+                                    <span class="product-sku">SKU: ${product.sku}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${product.category}</td>
+                        <td>$${product.price.toFixed(2)}</td>
+                        <td>
+                            <input type="number" 
+                                   class="quantity-input" 
+                                   value="${product.quantity}" 
+                                   min="0"
+                                   data-product-id="${product.id}"
+                                   onchange="updateQuantity(${product.id}, this.value)">
+                        </td>
+                        <td>${getStockBadge(status)}</td>
+                        <td>${product.lastUpdated}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon edit" onclick="editProduct(${product.id})" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon delete" onclick="showDeleteModal(${product.id})" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }, 300);
+    }
+
+    // Render pagination
+    function renderPagination() {
+        const pagination = document.getElementById('inventoryPagination');
+        if (!pagination) return;
+        
+        const totalPages = Math.ceil(inventoryState.filteredProducts.length / inventoryState.itemsPerPage);
+        
+        if (totalPages <= 1) {
+            pagination.innerHTML = '';
+            return;
+        }
+        
+        let paginationHTML = `
+            <button class="page-btn" onclick="changePage(${inventoryState.currentPage - 1})" 
+                    ${inventoryState.currentPage === 1 ? 'disabled' : ''}>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        `;
+        
+        for (let i = 1; i <= totalPages; i++) {
+            paginationHTML += `
+                <button class="page-btn ${inventoryState.currentPage === i ? 'active' : ''}" 
+                        onclick="changePage(${i})">
+                    ${i}
+                </button>
+            `;
+        }
+        
+        paginationHTML += `
+            <button class="page-btn" onclick="changePage(${inventoryState.currentPage + 1})" 
+                    ${inventoryState.currentPage === totalPages ? 'disabled' : ''}>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        `;
+        
+        pagination.innerHTML = paginationHTML;
+    }
+
+    // Expose functions to global scope for onclick handlers
+    window.changePage = function(page) {
+        const totalPages = Math.ceil(inventoryState.filteredProducts.length / inventoryState.itemsPerPage);
+        if (page < 1 || page > totalPages) return;
+        inventoryState.currentPage = page;
+        renderInventoryTable();
+        renderPagination();
+    };
+
+    window.updateQuantity = function(productId, newQuantity) {
+        const quantity = parseInt(newQuantity);
+        if (quantity < 0 || isNaN(quantity)) return;
+        
+        const product = inventoryState.products.find(p => p.id === productId);
+        if (product) {
+            product.quantity = quantity;
+            product.lastUpdated = new Date().toISOString().split('T')[0];
+            saveProducts();
+            updateInventoryStats();
+            filterProducts();
+            showToast('Quantity updated successfully', 'success');
+        }
+    };
+
+    window.editProduct = function(productId) {
+        openProductModal(productId);
+    };
+
+    window.showDeleteModal = function(productId) {
+        inventoryState.deletingProductId = productId;
+        const product = inventoryState.products.find(p => p.id === productId);
+        if (product) {
+            const deleteProductName = document.getElementById('deleteProductName');
+            if (deleteProductName) deleteProductName.textContent = `${product.name} (${product.sku})`;
+        }
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) deleteModal.classList.add('active');
+    };
+
+    // Setup inventory event listeners
+    function setupInventoryEventListeners() {
+        // Add Product Button
+        const addProductBtn = document.getElementById('addProductBtn');
+        if (addProductBtn) {
+            addProductBtn.onclick = function() {
+                openProductModal(null);
+            };
+        }
+        
+        // Export Button
+        const exportBtn = document.getElementById('exportInventoryBtn');
+        if (exportBtn) {
+            exportBtn.onclick = function() {
+                exportInventory();
+            };
+        }
+        
+        // Search Input
+        const searchInput = document.getElementById('inventorySearch');
+        if (searchInput) {
+            searchInput.oninput = function() {
+                inventoryState.searchTerm = this.value;
+                filterProducts();
+            };
+        }
+        
+        // Category Filter
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter) {
+            categoryFilter.onchange = function() {
+                inventoryState.categoryFilter = this.value;
+                filterProducts();
+            };
+        }
+        
+        // Stock Filter
+        const stockFilter = document.getElementById('stockFilter');
+        if (stockFilter) {
+            stockFilter.onchange = function() {
+                inventoryState.stockFilter = this.value;
+                filterProducts();
+            };
+        }
+        
+        // Product Modal
+        const closeProductModalBtn = document.getElementById('closeProductModal');
+        if (closeProductModalBtn) {
+            closeProductModalBtn.onclick = closeProductModal;
+        }
+        
+        const cancelProductBtn = document.getElementById('cancelProductBtn');
+        if (cancelProductBtn) {
+            cancelProductBtn.onclick = closeProductModal;
+        }
+        
+        const productForm = document.getElementById('productForm');
+        if (productForm) {
+            productForm.onsubmit = saveProduct;
+        }
+        
+        // Delete Modal
+        const closeDeleteModalBtn = document.getElementById('closeDeleteModal');
+        if (closeDeleteModalBtn) {
+            closeDeleteModalBtn.onclick = closeDeleteModal;
+        }
+        
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        if (cancelDeleteBtn) {
+            cancelDeleteBtn.onclick = closeDeleteModal;
+        }
+        
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.onclick = confirmDelete;
+        }
+        
+        // Close modals on outside click
+        window.onclick = function(event) {
+            const productModal = document.getElementById('productModal');
+            const deleteModal = document.getElementById('deleteModal');
+            if (event.target === productModal) {
+                closeProductModal();
+            }
+            if (event.target === deleteModal) {
+                closeDeleteModal();
+            }
+        };
+    }
+
+    // Open product modal
+    function openProductModal(productId = null) {
+        inventoryState.editingProductId = productId;
+        const modal = document.getElementById('productModal');
+        const title = document.getElementById('productModalTitle');
+        const form = document.getElementById('productForm');
+        
+        if (!modal || !title || !form) return;
+        
+        form.reset();
+        
+        if (productId) {
+            const product = inventoryState.products.find(p => p.id === productId);
+            if (product) {
+                title.textContent = 'Edit Product';
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productSKU').value = product.sku;
+                document.getElementById('productCategory').value = product.category;
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productQuantity').value = product.quantity;
+                document.getElementById('productMinStock').value = product.minStock;
+                document.getElementById('productSupplier').value = product.supplier || '';
+                document.getElementById('productLocation').value = product.location || '';
+                document.getElementById('productDescription').value = product.description || '';
+            }
+        } else {
+            title.textContent = 'Add Product';
+        }
+        
+        modal.classList.add('active');
+    }
+
+    // Close product modal
+    function closeProductModal() {
+        const modal = document.getElementById('productModal');
+        if (modal) modal.classList.remove('active');
+        inventoryState.editingProductId = null;
+    }
+
+    // Save product
+    function saveProduct(event) {
+        event.preventDefault();
+        
+        const productData = {
+            name: document.getElementById('productName').value.trim(),
+            sku: document.getElementById('productSKU').value.trim(),
+            category: document.getElementById('productCategory').value,
+            price: parseFloat(document.getElementById('productPrice').value),
+            quantity: parseInt(document.getElementById('productQuantity').value),
+            minStock: parseInt(document.getElementById('productMinStock').value),
+            supplier: document.getElementById('productSupplier').value.trim(),
+            location: document.getElementById('productLocation').value.trim(),
+            description: document.getElementById('productDescription').value.trim()
+        };
+        
+        // Validate SKU uniqueness
+        const skuExists = inventoryState.products.some(p => 
+            p.sku === productData.sku && p.id !== inventoryState.editingProductId
+        );
+        
+        if (skuExists) {
+            showToast('SKU already exists', 'error');
+            return;
+        }
+        
+        if (inventoryState.editingProductId) {
+            // Update existing product
+            const index = inventoryState.products.findIndex(p => p.id === inventoryState.editingProductId);
+            if (index !== -1) {
+                inventoryState.products[index] = {
+                    ...inventoryState.products[index],
+                    ...productData,
+                    lastUpdated: new Date().toISOString().split('T')[0]
+                };
+                showToast('Product updated successfully', 'success');
+            }
+        } else {
+            // Add new product
+            const newProduct = {
+                id: Date.now(),
+                ...productData,
+                lastUpdated: new Date().toISOString().split('T')[0]
+            };
+            inventoryState.products.push(newProduct);
+            showToast('Product added successfully', 'success');
+        }
+        
+        saveProducts();
+        updateInventoryStats();
+        filterProducts();
+        closeProductModal();
+    }
+
+    // Close delete modal
+    function closeDeleteModal() {
+        const modal = document.getElementById('deleteModal');
+        if (modal) modal.classList.remove('active');
+        inventoryState.deletingProductId = null;
+    }
+
+    // Confirm delete
+    function confirmDelete() {
+        if (inventoryState.deletingProductId) {
+            inventoryState.products = inventoryState.products.filter(p => p.id !== inventoryState.deletingProductId);
+            saveProducts();
+            updateInventoryStats();
+            filterProducts();
+            showToast('Product deleted successfully', 'success');
+        }
+        closeDeleteModal();
+    }
+
+    // Export inventory to CSV
+    function exportInventory() {
+        if (inventoryState.products.length === 0) {
+            showToast('No products to export', 'error');
+            return;
+        }
+        
+        const headers = ['ID', 'Name', 'SKU', 'Category', 'Price', 'Quantity', 'Min Stock', 'Supplier', 'Location', 'Description', 'Last Updated'];
+        const csvData = inventoryState.products.map(p => [
+            p.id,
+            p.name,
+            p.sku,
+            p.category,
+            p.price,
+            p.quantity,
+            p.minStock,
+            p.supplier || '',
+            p.location || '',
+            p.description || '',
+            p.lastUpdated
+        ]);
+        
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `inventory_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showToast('Inventory exported successfully', 'success');
     }
 
     // ---------- CHECK AUTH STATUS ON LOAD ----------
