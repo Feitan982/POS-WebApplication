@@ -78,6 +78,7 @@
 
     // ---------- USER DATABASE (localStorage) ----------
     const USERS_KEY = 'pos_users_pro_v2';
+    const ADMIN_CREATED_KEY = 'pos_admin_account_created';
     
     function getUsers() {
         try {
@@ -101,7 +102,22 @@
     }
 
     function hasAdminAccount() {
-        return getUsers().some(u => u.role === 'admin');
+        return getUsers().some(u => u.role === 'admin') || localStorage.getItem(ADMIN_CREATED_KEY) === 'true';
+    }
+
+    async function refreshAdminAvailability() {
+        if (!isSupabaseReady()) return;
+
+        const { data, error } = await supabaseApi.getUsers();
+        if (error) {
+            console.warn('Unable to check existing admin accounts:', error.message);
+            return;
+        }
+
+        if (Array.isArray(data) && data.some(user => user.role === 'admin')) {
+            localStorage.setItem(ADMIN_CREATED_KEY, 'true');
+            updateSignupRoleAvailability();
+        }
     }
 
     function findUserByEmail(email) {
@@ -137,9 +153,35 @@
     const sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
     const mobileToggle = document.getElementById('mobileToggle');
     const sidebar = document.getElementById('sidebar');
+    const emailConfirmationModal = document.getElementById('emailConfirmationModal');
+    const emailConfirmationAddress = document.getElementById('emailConfirmationAddress');
+    const emailConfirmationClose = document.getElementById('emailConfirmationClose');
+    const emailConfirmationContinue = document.getElementById('emailConfirmationContinue');
     
     let selectedRole = 'admin';
     let currentUser = null;
+
+    function showEmailConfirmationModal(email) {
+        if (!emailConfirmationModal) return;
+        if (emailConfirmationAddress) emailConfirmationAddress.textContent = email;
+        emailConfirmationModal.hidden = false;
+        emailConfirmationClose?.focus();
+    }
+
+    function closeEmailConfirmationModal() {
+        if (emailConfirmationModal) emailConfirmationModal.hidden = true;
+    }
+
+    emailConfirmationClose?.addEventListener('click', closeEmailConfirmationModal);
+    emailConfirmationContinue?.addEventListener('click', closeEmailConfirmationModal);
+    emailConfirmationModal?.addEventListener('click', (event) => {
+        if (event.target === emailConfirmationModal) closeEmailConfirmationModal();
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && emailConfirmationModal && !emailConfirmationModal.hidden) {
+            closeEmailConfirmationModal();
+        }
+    });
 
     // ---------- TOAST ----------
     function showToast(message, type = 'success') {
@@ -470,13 +512,21 @@
                     const { data, error } = await signUpWithSupabase({ fullName: name, email, password, role });
                     if (error) throw error;
 
-                    showToast(`Account created for ${name} (${role})! Please sign in.`, 'success');
                     const signinEmail = document.getElementById('signinEmail');
                     const signinPassword = document.getElementById('signinPassword');
                     if (signinEmail) signinEmail.value = email;
                     if (signinPassword) signinPassword.value = '';
                     showView(signinView);
                     selectedRole = role;
+                    if (role === 'admin') {
+                        localStorage.setItem(ADMIN_CREATED_KEY, 'true');
+                        updateSignupRoleAvailability();
+                    }
+                    if (data?.session) {
+                        showToast(`Account created for ${name} (${role})! Please sign in.`, 'success');
+                    } else {
+                        showEmailConfirmationModal(email);
+                    }
                     return;
                 }
 
@@ -707,6 +757,9 @@
     function init() {
         // Check authentication status
         checkAuth();
+
+        // Restore the admin-only-once rule from Supabase after refresh.
+        refreshAdminAvailability();
         
         // Update system status
         updateSystemStatus();
