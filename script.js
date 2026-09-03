@@ -78,6 +78,7 @@
 
     // ---------- USER DATABASE (localStorage) ----------
     const USERS_KEY = 'pos_users_pro_v2';
+    const ADMIN_CREATED_KEY = 'pos_admin_account_created';
     
     function getUsers() {
         try {
@@ -101,7 +102,22 @@
     }
 
     function hasAdminAccount() {
-        return getUsers().some(u => u.role === 'admin');
+        return getUsers().some(u => u.role === 'admin') || localStorage.getItem(ADMIN_CREATED_KEY) === 'true';
+    }
+
+    async function refreshAdminAvailability() {
+        if (!isSupabaseReady()) return;
+
+        const { data, error } = await supabaseApi.getUsers();
+        if (error) {
+            console.warn('Unable to check existing admin accounts:', error.message);
+            return;
+        }
+
+        if (Array.isArray(data) && data.some(user => user.role === 'admin')) {
+            localStorage.setItem(ADMIN_CREATED_KEY, 'true');
+            updateSignupRoleAvailability();
+        }
     }
 
     function findUserByEmail(email) {
@@ -502,6 +518,10 @@
                     if (signinPassword) signinPassword.value = '';
                     showView(signinView);
                     selectedRole = role;
+                    if (role === 'admin') {
+                        localStorage.setItem(ADMIN_CREATED_KEY, 'true');
+                        updateSignupRoleAvailability();
+                    }
                     if (data?.session) {
                         showToast(`Account created for ${name} (${role})! Please sign in.`, 'success');
                     } else {
@@ -737,6 +757,9 @@
     function init() {
         // Check authentication status
         checkAuth();
+
+        // Restore the admin-only-once rule from Supabase after refresh.
+        refreshAdminAvailability();
         
         // Update system status
         updateSystemStatus();
