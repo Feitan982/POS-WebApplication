@@ -49,7 +49,7 @@
                         decoding="async"
                     >
                 </div>
-                <div class="client-company-name">Client-Logo</div>
+                <div class="client-company-name">Kirby's Hardware</div>
                 <div class="client-company-tag">Your Retail Partner</div>
             </div>
 
@@ -458,19 +458,19 @@
                     <div class="quick-actions">
                         <h2>Quick Actions</h2>
                         <div class="actions-grid">
-                            <button class="action-btn">
+                            <button class="action-btn" onclick="navigateToPage('pos')">
                                 <i class="fas fa-plus-circle"></i>
                                 New Order
                             </button>
-                            <button class="action-btn">
+                            <button class="action-btn" onclick="navigateToPage('inventory')">
                                 <i class="fas fa-plus"></i>
                                 Add Product
                             </button>
-                            <button class="action-btn">
+                            <button class="action-btn" onclick="navigateToPage('reports')">
                                 <i class="fas fa-file-invoice"></i>
                                 Generate Report
                             </button>
-                            <button class="action-btn">
+                            <button class="action-btn" onclick="navigateToPage('settings')">
                                 <i class="fas fa-users-cog"></i>
                                 Manage Users
                             </button>
@@ -478,37 +478,390 @@
                     </div>
                 </div>
 
-                <!-- Other Pages (Placeholders) -->
+                <!-- Point of Sale Page -->
                 <div class="page-content" id="page-pos">
-                    <h1>Point of Sale</h1>
-                    <p>POS functionality coming soon...</p>
+                    <div class="page-header">
+                        <h1>Point of Sale</h1>
+                        <p>Process sales transactions</p>
+                    </div>
+                    <div class="pos-container">
+                        <div class="pos-products">
+                            <div class="pos-search">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Search products...">
+                            </div>
+                            <div class="pos-product-grid">
+                                <!-- Products will be loaded here -->
+                                <p>POS functionality coming soon...</p>
+                            </div>
+                        </div>
+                        <div class="pos-cart">
+                            <h3>Current Sale</h3>
+                            <div class="cart-items">
+                                <!-- Cart items will appear here -->
+                            </div>
+                            <div class="cart-total">
+                                <span>Total:</span>
+                                <strong>$0.00</strong>
+                            </div>
+                            <button class="submit-btn">Complete Sale</button>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Inventory Management Page -->
                 <div class="page-content" id="page-inventory">
-                    <h1>Inventory Management</h1>
-                    <p>Inventory management coming soon...</p>
+                    <div class="inventory-header">
+                        <div>
+                            <h1>Inventory Management</h1>
+                            <p>Manage your products and stock levels</p>
+                        </div>
+                        <div class="inventory-actions">
+                            <button class="submit-btn" id="addProductBtn">
+                                <i class="fas fa-plus"></i> Add Product
+                            </button>
+                            <button class="secondary-btn" id="exportInventoryBtn">
+                                <i class="fas fa-download"></i> Export CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Stats -->
+                    <div class="stats-grid inventory-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalProducts">0</h3>
+                                <p>Total Products</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="inStockProducts">0</h3>
+                                <p>In Stock</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="lowStockProducts">0</h3>
+                                <p>Low Stock</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="outOfStockProducts">0</h3>
+                                <p>Out of Stock</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Tools -->
+                    <div class="inventory-tools">
+                        <div class="nav-search" style="max-width: 300px; flex: 1;">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="inventorySearch" placeholder="Search products...">
+                        </div>
+                        <div class="inventory-filters">
+                            <select class="filter-select" id="categoryFilter">
+                                <option value="">All Categories</option>
+                                <option value="tools">Tools</option>
+                                <option value="hardware">Hardware</option>
+                                <option value="electrical">Electrical</option>
+                                <option value="plumbing">Plumbing</option>
+                                <option value="paint">Paint & Supplies</option>
+                                <option value="garden">Garden & Outdoor</option>
+                                <option value="building">Building Materials</option>
+                                <option value="fasteners">Fasteners</option>
+                                <option value="safety">Safety Equipment</option>
+                            </select>
+                            <select class="filter-select" id="stockFilter">
+                                <option value="">All Stock Levels</option>
+                                <option value="in_stock">In Stock</option>
+                                <option value="low_stock">Low Stock</option>
+                                <option value="out_of_stock">Out of Stock</option>
+                                <option value="over_stock">Over Stocked</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Table -->
+                    <div class="inventory-table-container">
+                        <div id="inventoryLoading" class="loading-spinner" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading inventory...</p>
+                        </div>
+                        <div id="inventoryEmpty" class="empty-state" style="display: none;">
+                            <i class="fas fa-box-open"></i>
+                            <h3>No Products Found</h3>
+                            <p>Try adjusting your search or filters</p>
+                            <button class="submit-btn" onclick="document.getElementById('addProductBtn').click()">
+                                <i class="fas fa-plus"></i> Add Product
+                            </button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table class="inventory-table" id="inventoryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Status</th>
+                                        <th>Last Updated</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventoryTableBody">
+                                    <!-- Products will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination" id="inventoryPagination">
+                        <!-- Pagination buttons will be generated here -->
+                    </div>
                 </div>
+
+                <!-- Orders Page -->
                 <div class="page-content" id="page-orders">
-                    <h1>Orders</h1>
-                    <p>Order management coming soon...</p>
+                    <div class="page-header">
+                        <h1>Orders</h1>
+                        <p>Manage customer orders</p>
+                    </div>
+                    <div class="orders-container">
+                        <div class="orders-filters">
+                            <select class="filter-select">
+                                <option>All Orders</option>
+                                <option>Pending</option>
+                                <option>Completed</option>
+                                <option>Cancelled</option>
+                            </select>
+                            <select class="filter-select">
+                                <option>All Dates</option>
+                                <option>Today</option>
+                                <option>This Week</option>
+                                <option>This Month</option>
+                            </select>
+                        </div>
+                        <div class="orders-table-container">
+                            <table class="inventory-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 3rem;">
+                                            <i class="fas fa-clipboard-list" style="font-size: 3rem; color: #cbd5e0;"></i>
+                                            <p style="margin-top: 1rem; color: #718096;">No orders yet</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Customers Page -->
                 <div class="page-content" id="page-customers">
-                    <h1>Customers</h1>
-                    <p>Customer management coming soon...</p>
+                    <div class="page-header">
+                        <h1>Customers</h1>
+                        <p>Manage customer information</p>
+                    </div>
+                    <div class="customers-container">
+                        <div class="inventory-tools">
+                            <div class="nav-search" style="max-width: 300px; flex: 1;">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Search customers...">
+                            </div>
+                            <button class="submit-btn">
+                                <i class="fas fa-user-plus"></i> Add Customer
+                            </button>
+                        </div>
+                        <div class="customers-table-container">
+                            <table class="inventory-table">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Orders</th>
+                                        <th>Total Spent</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; padding: 3rem;">
+                                            <i class="fas fa-users" style="font-size: 3rem; color: #cbd5e0;"></i>
+                                            <p style="margin-top: 1rem; color: #718096;">No customers yet</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Reports Page -->
                 <div class="page-content" id="page-reports">
-                    <h1>Reports</h1>
-                    <p>Analytics and reports coming soon...</p>
+                    <div class="page-header">
+                        <h1>Reports</h1>
+                        <p>View analytics and generate reports</p>
+                    </div>
+                    <div class="reports-grid">
+                        <div class="report-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Sales Report</h3>
+                            <p>Daily, weekly, and monthly sales analytics</p>
+                            <button class="secondary-btn">Generate Report</button>
+                        </div>
+                        <div class="report-card">
+                            <i class="fas fa-boxes"></i>
+                            <h3>Inventory Report</h3>
+                            <p>Stock levels and product performance</p>
+                            <button class="secondary-btn">Generate Report</button>
+                        </div>
+                        <div class="report-card">
+                            <i class="fas fa-users"></i>
+                            <h3>Customer Report</h3>
+                            <p>Customer insights and purchase history</p>
+                            <button class="secondary-btn">Generate Report</button>
+                        </div>
+                        <div class="report-card">
+                            <i class="fas fa-file-invoice"></i>
+                            <h3>Financial Report</h3>
+                            <p>Revenue, expenses, and profit margins</p>
+                            <button class="secondary-btn">Generate Report</button>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Settings Page -->
                 <div class="page-content" id="page-settings">
-                    <h1>Settings</h1>
-                    <p>System settings coming soon...</p>
+                    <div class="page-header">
+                        <h1>Settings</h1>
+                        <p>Configure system preferences</p>
+                    </div>
+                    <div class="settings-container">
+                        <div class="settings-section">
+                            <h3>General Settings</h3>
+                            <div class="form-group">
+                                <label>Store Name</label>
+                                <input type="text" value="Kirby's Hardware" class="settings-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Currency</label>
+                                <select class="settings-input">
+                                    <option>USD ($)</option>
+                                    <option>EUR (€)</option>
+                                    <option>GBP (£)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Time Zone</label>
+                                <select class="settings-input">
+                                    <option>UTC-8 (Pacific Time)</option>
+                                    <option>UTC-5 (Eastern Time)</option>
+                                    <option>UTC+0 (GMT)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <h3>Notifications</h3>
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" checked>
+                                <span class="checkmark"></span>
+                                <span>Email notifications for low stock</span>
+                            </label>
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" checked>
+                                <span class="checkmark"></span>
+                                <span>Daily sales report</span>
+                            </label>
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                                <span>Weekly inventory summary</span>
+                            </label>
+                        </div>
+                        <button class="submit-btn">Save Settings</button>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+    <!-- Add/Edit Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="productModalTitle">Add Product</h2>
+                <button class="modal-close-btn" id="closeProductModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="productForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="productName">Product Name *</label>
+                        <input type="text" id="productName" required placeholder="Enter product name">
+                    </div>
+                    <div class="form-group">
+                        <label for="productSKU">SKU *</label>
+                        <input type="text" id="productSKU" required placeholder="e.g., PRD-001">
+                    </div>
+                    <div class="form-group">
+                        <label for="productCategory">Category *</label>
+                        <select id="productCategory" required>
+                            <option value="">Select category</option>
+                            <option value="tools">Tools</option>
+                            <option value="hardware">Hardware</option>
+                            <option value="electrical">Electrical</option>
+                            <option value="plumbing">Plumbing</option>
+                            <option value="paint">Paint & Supplies</option>
+                            <option value="garden">Garden & Outdoor</option>
+                            <option value="building">Building Materials</option>
+                            <option value="fasteners">Fasteners</option>
+                            <option value="safety">Safety Equipment</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">Price ($) *</label>
+                        <input type="number" id="productPrice" required min="0" step="0.01" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="productQuantity">Initial Quantity *</label>
+                        <input type="number" id="productQuantity" required min="0" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="productMinStock">Minimum Stock Level *</label>
+                        <input type="number" id="productMinStock" required min="1" placeholder="e.g., 10">
+                    </div>
+                    <div class="form-group">
+                        <label for="productSupplier">Supplier</label>
+                        <input type="text" id="productSupplier" placeholder="Supplier name">
+                    </div>
+                    <div class="form-group">
+                        <label for="productLocation">Storage Location</label>
+                        <
