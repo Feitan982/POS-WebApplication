@@ -1,6 +1,6 @@
 window.POS_SUPABASE = (() => {
     const DEFAULT_CONFIG = {
-        enabled: false,
+        enabled: true,
         url: 'https://itsjyzlquevohkoqufmw.supabase.co',
         anonKey: 'sb_publishable_8877cuPp8cnywtpnR_HHeA_9_d0gxNA',
         tableName: 'profiles'
