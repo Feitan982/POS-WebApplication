@@ -484,42 +484,113 @@
                     </div>
                 </div>
 
-                <!-- Point of Sale Page -->
-                <div class="page-content" id="page-pos">
-                    <div class="page-header">
-                        <h1>Point of Sale</h1>
-                        <p>Process sales transactions</p>
+                      <!-- POS Page Content -->
+<div class="page-content" id="page-pos">
+    <div class="page-header">
+        <h1>Point of Sale</h1>
+        <p>Process transactions quickly and efficiently</p>
+    </div>
+    <div class="pos-layout">
+        <!-- Product Catalog -->
+        <div class="product-catalog">
+            <div class="product-catalog-header">
+                <h3><i class="fas fa-box"></i> Product Catalog</h3>
+                <div class="search-products">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search products..." id="productSearch">
+                </div>
+            </div>
+            <div class="product-grid-wrapper">
+                <div class="product-grid" id="productGrid">
+                    <!-- Product cards (populated statically for demo) -->
+                    <div class="product-card" data-name="Hammer" data-price="12.99" data-category="tools">
+                        <i class="fas fa-hammer"></i>
+                        <p>Hammer</p>
+                        <strong>$12.99</strong>
                     </div>
-                    <div class="pos-container">
-                        <div class="pos-products">
-                            <div class="pos-search">
-                                <i class="fas fa-search"></i>
-                                <input type="text" placeholder="Search products...">
-                            </div>
-                            <div class="pos-product-grid">
-                                <p style="color: #94a3b8; text-align: center; padding: 3rem;">
-                                    <i class="fas fa-shopping-cart" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
-                                    POS functionality coming soon...
-                                </p>
-                            </div>
-                        </div>
-                        <div class="pos-cart">
-                            <h3>Current Sale</h3>
-                            <div class="cart-items">
-                                <p style="color: #94a3b8; text-align: center; padding: 2rem;">
-                                    No items in cart
-                                </p>
-                            </div>
-                            <div class="cart-total">
-                                <span>Total:</span>
-                                <strong>$0.00</strong>
-                            </div>
-                            <button class="submit-btn">
-                                <i class="fas fa-check-circle"></i> Complete Sale
-                            </button>
-                        </div>
+                    <div class="product-card" data-name="Screwdriver" data-price="7.50" data-category="tools">
+                        <i class="fas fa-screwdriver"></i>
+                        <p>Screwdriver</p>
+                        <strong>$7.50</strong>
+                    </div>
+                    <div class="product-card" data-name="Wrench Set" data-price="25.00" data-category="tools">
+                        <i class="fas fa-tools"></i>
+                        <p>Wrench Set</p>
+                        <strong>$25.00</strong>
+                    </div>
+                    <div class="product-card" data-name="Paint Brush" data-price="4.99" data-category="painting">
+                        <i class="fas fa-paint-brush"></i>
+                        <p>Paint Brush</p>
+                        <strong>$4.99</strong>
+                    </div>
+                    <div class="product-card" data-name="Nails (1kg)" data-price="6.75" data-category="hardware">
+                        <i class="fas fa-grip-lines"></i>
+                        <p>Nails (1kg)</p>
+                        <strong>$6.75</strong>
+                    </div>
+                    <div class="product-card" data-name="Power Drill" data-price="89.00" data-category="power-tools">
+                        <i class="fas fa-plug"></i>
+                        <p>Power Drill</p>
+                        <strong>$89.00</strong>
+                    </div>
+                    <div class="product-card" data-name="Tape Measure" data-price="8.99" data-category="tools">
+                        <i class="fas fa-ruler"></i>
+                        <p>Tape Measure</p>
+                        <strong>$8.99</strong>
+                    </div>
+                    <div class="product-card" data-name="Safety Gloves" data-price="3.50" data-category="safety">
+                        <i class="fas fa-hand-paper"></i>
+                        <p>Safety Gloves</p>
+                        <strong>$3.50</strong>
+                    </div>
+                    <div class="product-card" data-name="Saw" data-price="34.99" data-category="tools">
+                        <i class="fas fa-cut"></i>
+                        <p>Saw</p>
+                        <strong>$34.99</strong>
+                    </div>
+                    <div class="product-card" data-name="Ladder" data-price="129.00" data-category="equipment">
+                        <i class="fas fa-arrow-up"></i>
+                        <p>Ladder</p>
+                        <strong>$129.00</strong>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Cart Section -->
+        <div class="cart-section">
+            <h3><i class="fas fa-shopping-cart"></i> Current Order</h3>
+            <div class="cart-items" id="cartItems">
+                <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                    <i class="fas fa-shopping-cart" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <p>Cart is empty</p>
+                    <p style="font-size: 0.9rem;">Click on products to add them</p>
+                </div>
+            </div>
+            <div class="cart-totals">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <strong id="subtotal">$0.00</strong>
+                </div>
+                <div class="total-row">
+                    <span>Tax (8%):</span>
+                    <strong id="tax">$0.00</strong>
+                </div>
+                <div class="total-row grand-total">
+                    <span>Total:</span>
+                    <strong id="total">$0.00</strong>
+                </div>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn">
+                <i class="fas fa-credit-card"></i> Process Payment
+            </button>
+            <button class="clear-btn" id="clearCartBtn">
+                <i class="fas fa-trash"></i> Clear Cart
+            </button>
+        </div>
+    </div>
+</div>
+
 
                 <!-- Inventory Management Page -->
                 <div class="page-content" id="page-inventory">
@@ -1030,10 +1101,76 @@
             </div>
         </div>
     </div>
+              <!-- Payment Modal -->
+<div class="modal-overlay" id="paymentModal">
+    <div class="modal-card">
+        <button class="modal-close" id="paymentClose">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-icon">
+            <i class="fas fa-credit-card"></i>
+        </div>
+        <h2>Complete Transaction</h2>
+        <p>Total Amount: <strong id="paymentTotal" style="color: var(--accent); font-size: 2rem;">$0.00</strong></p>
+        
+        <!-- Customer Information -->
+        <div style="text-align: left; margin: 1.5rem 0;">
+            <h3 style="margin-bottom: 1rem;">Customer Information (Optional)</h3>
+            <div class="form-group">
+                <label>Customer Name</label>
+                <div class="input-wrapper">
+                    <span class="input-icon"><i class="fas fa-user"></i></span>
+                    <input type="text" id="customerName" placeholder="Enter customer name">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <div class="input-wrapper">
+                    <span class="input-icon"><i class="fas fa-phone"></i></span>
+                    <input type="tel" id="customerPhone" placeholder="Enter phone number">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <div class="input-wrapper">
+                    <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                    <input type="email" id="customerEmail" placeholder="Enter email address">
+                </div>
+            </div>
+        </div>
+        
+        <div class="payment-methods">
+            <div class="payment-method selected" data-method="cash">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Cash</span>
+            </div>
+            <div class="payment-method" data-method="card">
+                <i class="fas fa-credit-card"></i>
+                <span>Credit/Debit Card</span>
+            </div>
+            <div class="payment-method" data-method="mobile">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Mobile Payment</span>
+            </div>
+        </div>
+        <div class="form-group" id="cashInputGroup">
+            <label>Cash Received</label>
+            <div class="input-wrapper">
+                <span class="input-icon"><i class="fas fa-dollar-sign"></i></span>
+                <input type="number" id="cashReceived" placeholder="Enter amount" step="0.01">
+            </div>
+            <p style="margin-top: 1rem;">Change: <strong id="changeAmount">$0.00</strong></p>
+        </div>
+        <button class="submit-btn" id="confirmPaymentBtn" style="width: 100%;">
+            <i class="fas fa-check"></i> Complete Payment
+        </button>
+    </div>
+</div>
   
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <script src="script.js"></script>
+    <script src="pos.js"></script>
 </body>
 </html>
