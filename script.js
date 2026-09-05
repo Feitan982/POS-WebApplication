@@ -158,6 +158,34 @@
     let selectedRole = 'admin';
     let currentUser = null;
 
+    const ROLE_ACCESS = {
+        admin: new Set(['overview', 'pos', 'inventory', 'orders', 'customers', 'reports', 'audit', 'settings']),
+        cashier: new Set(['overview', 'pos', 'orders', 'customers', 'reports'])
+    };
+
+    function getUserRole(user = currentUser) {
+        const role = user?.role || user?.user_metadata?.role || user?.app_metadata?.role;
+        return role === 'admin' ? 'admin' : 'cashier';
+    }
+
+    function canAccessPage(page, user = currentUser) {
+        return ROLE_ACCESS[getUserRole(user)].has(page);
+    }
+
+    function applyRoleAccess(user = currentUser) {
+        const role = getUserRole(user);
+        document.querySelectorAll('.sidebar-link[data-page]').forEach(link => {
+            const isAllowed = ROLE_ACCESS[role].has(link.dataset.page);
+            link.hidden = !isAllowed;
+            link.setAttribute('aria-hidden', String(!isAllowed));
+        });
+
+        const activePage = document.querySelector('.page-content.active')?.id.replace('page-', '');
+        if (activePage && !canAccessPage(activePage, user)) {
+            window.navigateToPage('overview');
+        }
+    }
+
     // ---------- THEME ----------
     const THEME_KEY = 'pos_theme';
 
@@ -231,6 +259,7 @@
                      user?.email?.split('@')[0] || 
                      'User';
         currentUser = user;
+        applyRoleAccess(user);
         
         if (userDisplayName) userDisplayName.textContent = name;
         if (dashboardUserName) dashboardUserName.textContent = name;
@@ -462,7 +491,8 @@
                     // For local mode, create a fake user object
                     loadDashboard({
                         email: user.email,
-                        user_metadata: { full_name: user.name }
+                        role: user.role,
+                        user_metadata: { full_name: user.name, role: user.role }
                     });
                 } else if (user) {
                     showToast('Incorrect password.', 'error');
@@ -675,12 +705,17 @@
         link.addEventListener('click', function(e) {
             e.preventDefault();
             
+            const page = this.dataset.page;
+            if (!canAccessPage(page)) {
+                window.navigateToPage('overview');
+                return;
+            }
+
             // Remove active from all
             document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
             this.classList.add('active');
             
             // Show corresponding page
-            const page = this.dataset.page;
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             const target = document.getElementById(`page-${page}`);
             if (target) target.classList.add('active');
@@ -697,6 +732,10 @@
 
     // ---------- NAVIGATION FUNCTION ----------
     window.navigateToPage = function(page) {
+        if (!canAccessPage(page)) {
+            page = 'overview';
+        }
+
         document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
         const sidebarLink = document.querySelector(`.sidebar-link[data-page="${page}"]`);
         if (sidebarLink) sidebarLink.classList.add('active');
@@ -1255,6 +1294,14 @@
             if (sessionUser) {
                 try {
                     const user = JSON.parse(sessionUser);
+                    const storedAccount = user?.email ? findUserByEmail(user.email) : null;
+                    if (storedAccount) {
+                        user.role = storedAccount.role;
+                        user.user_metadata = {
+                            ...(user.user_metadata || {}),
+                            role: storedAccount.role
+                        };
+                    }
                     loadDashboard(user);
                     return;
                 } catch (e) {
