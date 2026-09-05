@@ -153,9 +153,70 @@
     const sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
     const mobileToggle = document.getElementById('mobileToggle');
     const sidebar = document.getElementById('sidebar');
+    const themeToggle = document.getElementById('themeToggle');
     
     let selectedRole = 'admin';
     let currentUser = null;
+
+    const ROLE_ACCESS = {
+        admin: new Set(['overview', 'pos', 'inventory', 'orders', 'customers', 'reports', 'audit', 'settings']),
+        cashier: new Set(['overview', 'pos', 'orders', 'customers', 'reports'])
+    };
+
+    function getUserRole(user = currentUser) {
+        const role = user?.role || user?.user_metadata?.role || user?.app_metadata?.role;
+        return role === 'admin' ? 'admin' : 'cashier';
+    }
+
+    function canAccessPage(page, user = currentUser) {
+        return ROLE_ACCESS[getUserRole(user)].has(page);
+    }
+
+    function applyRoleAccess(user = currentUser) {
+        const role = getUserRole(user);
+        document.querySelectorAll('.sidebar-link[data-page]').forEach(link => {
+            const isAllowed = ROLE_ACCESS[role].has(link.dataset.page);
+            link.hidden = !isAllowed;
+            link.setAttribute('aria-hidden', String(!isAllowed));
+        });
+
+        const activePage = document.querySelector('.page-content.active')?.id.replace('page-', '');
+        if (activePage && !canAccessPage(activePage, user)) {
+            window.navigateToPage('overview');
+        }
+    }
+
+    // ---------- THEME ----------
+    const THEME_KEY = 'pos_theme';
+
+    function applyTheme(theme) {
+        const isLight = theme === 'light';
+        document.documentElement.dataset.theme = isLight ? 'light' : 'dark';
+
+        if (themeToggle) {
+            const nextMode = isLight ? 'dark' : 'light';
+            themeToggle.setAttribute('aria-label', `Switch to ${nextMode} mode`);
+            themeToggle.setAttribute('title', `Switch to ${nextMode} mode`);
+        }
+    }
+
+    function initializeTheme() {
+        let savedTheme = 'dark';
+        try {
+            savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+        } catch (e) {}
+
+        applyTheme(savedTheme);
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const nextTheme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+                applyTheme(nextTheme);
+                try {
+                    localStorage.setItem(THEME_KEY, nextTheme);
+                } catch (e) {}
+            });
+        }
+    }
 
     // ---------- TOAST ----------
     function showToast(message, type = 'success') {
@@ -198,6 +259,7 @@
                      user?.email?.split('@')[0] || 
                      'User';
         currentUser = user;
+        applyRoleAccess(user);
         
         if (userDisplayName) userDisplayName.textContent = name;
         if (dashboardUserName) dashboardUserName.textContent = name;
@@ -429,7 +491,8 @@
                     // For local mode, create a fake user object
                     loadDashboard({
                         email: user.email,
-                        user_metadata: { full_name: user.name }
+                        role: user.role,
+                        user_metadata: { full_name: user.name, role: user.role }
                     });
                 } else if (user) {
                     showToast('Incorrect password.', 'error');
@@ -642,12 +705,17 @@
         link.addEventListener('click', function(e) {
             e.preventDefault();
             
+            const page = this.dataset.page;
+            if (!canAccessPage(page)) {
+                window.navigateToPage('overview');
+                return;
+            }
+
             // Remove active from all
             document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
             this.classList.add('active');
             
             // Show corresponding page
-            const page = this.dataset.page;
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             const target = document.getElementById(`page-${page}`);
             if (target) target.classList.add('active');
@@ -664,6 +732,10 @@
 
     // ---------- NAVIGATION FUNCTION ----------
     window.navigateToPage = function(page) {
+        if (!canAccessPage(page)) {
+            page = 'overview';
+        }
+
         document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
         const sidebarLink = document.querySelector(`.sidebar-link[data-page="${page}"]`);
         if (sidebarLink) sidebarLink.classList.add('active');
@@ -697,7 +769,7 @@
         });
     }
 
-    // ==================== INVENTORY MANAGEMENT ====================
+    /* Legacy inventory implementation removed; inventory.js owns this feature. */
     /*
     
     // Inventory State
@@ -714,84 +786,10 @@
     };
 
     // Sample inventory data
-    const sampleProducts = [
-        {
-            id: 1,
-            name: 'Power Drill',
-            sku: 'PRD-001',
-            category: 'tools',
-            price: 89.99,
-            quantity: 25,
-            minStock: 10,
-            supplier: 'ToolMaster Inc.',
-            location: 'Aisle 1, Shelf A',
-            description: 'Professional power drill with variable speed',
-            lastUpdated: '2026-09-01'
-        },
-        {
-            id: 2,
-            name: 'Hammer',
-            sku: 'PRD-002',
-            category: 'tools',
-            price: 15.99,
-            quantity: 50,
-            minStock: 20,
-            supplier: 'Hardware Supply Co.',
-            location: 'Aisle 1, Shelf B',
-            description: '16 oz claw hammer with fiberglass handle',
-            lastUpdated: '2026-08-28'
-        },
-        {
-            id: 3,
-            name: 'Screwdriver Set',
-            sku: 'PRD-003',
-            category: 'tools',
-            price: 24.99,
-            quantity: 8,
-            minStock: 15,
-            supplier: 'ToolMaster Inc.',
-            location: 'Aisle 2, Shelf A',
-            description: '6-piece screwdriver set with magnetic tips',
-            lastUpdated: '2026-09-02'
-        },
-        {
-            id: 4,
-            name: 'Paint Brush Set',
-            sku: 'PRD-004',
-            category: 'paint',
-            price: 12.99,
-            quantity: 0,
-            minStock: 10,
-            supplier: 'PaintPro Supplies',
-            location: 'Aisle 5, Shelf C',
-            description: '5-piece paint brush set for all paint types',
-            lastUpdated: '2026-08-25'
-        },
-        {
-            id: 5,
-            name: 'Safety Goggles',
-            sku: 'PRD-005',
-            category: 'safety',
-            price: 8.99,
-            quantity: 75,
-            minStock: 30,
-            supplier: 'SafetyFirst Gear',
-            location: 'Aisle 3, Shelf D',
-            description: 'Anti-fog safety goggles with UV protection',
-            lastUpdated: '2026-08-30'
-        }
-    ];
-
     // Initialize Inventory
     function initInventory() {
         // Load products from localStorage or use sample data
-        const savedProducts = localStorage.getItem('inventoryProducts');
-        if (savedProducts) {
-            inventoryState.products = JSON.parse(savedProducts);
-        } else {
-            inventoryState.products = [...sampleProducts];
-            saveProducts();
-        }
+        inventoryState.products = [];
         
         updateInventoryStats();
         filterProducts();
@@ -800,7 +798,6 @@
 
     // Save products to localStorage
     function saveProducts() {
-        localStorage.setItem('inventoryProducts', JSON.stringify(inventoryState.products));
     }
 
     // Update inventory statistics
@@ -1149,7 +1146,7 @@
                 document.getElementById('productQuantity').value = product.quantity;
                 document.getElementById('productMinStock').value = product.minStock;
                 document.getElementById('productSupplier').value = product.supplier || '';
-                document.getElementById('productLocation').value = product.location || '';
+                document.getElementById('productSize').value = product.size || '';
                 document.getElementById('productDescription').value = product.description || '';
             }
         } else {
@@ -1178,7 +1175,7 @@
             quantity: parseInt(document.getElementById('productQuantity').value),
             minStock: parseInt(document.getElementById('productMinStock').value),
             supplier: document.getElementById('productSupplier').value.trim(),
-            location: document.getElementById('productLocation').value.trim(),
+            size: document.getElementById('productSize').value.trim(),
             description: document.getElementById('productDescription').value.trim()
         };
         
@@ -1297,6 +1294,14 @@
             if (sessionUser) {
                 try {
                     const user = JSON.parse(sessionUser);
+                    const storedAccount = user?.email ? findUserByEmail(user.email) : null;
+                    if (storedAccount) {
+                        user.role = storedAccount.role;
+                        user.user_metadata = {
+                            ...(user.user_metadata || {}),
+                            role: storedAccount.role
+                        };
+                    }
                     loadDashboard(user);
                     return;
                 } catch (e) {
@@ -1329,6 +1334,8 @@
 
     // ---------- INIT ----------
     function init() {
+        initializeTheme();
+
         // Check authentication status
         checkAuth();
 

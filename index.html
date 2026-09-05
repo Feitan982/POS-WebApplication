@@ -265,6 +265,15 @@
                 </button>
             </div>
             <div class="nav-right">
+                <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light mode" title="Switch to light mode">
+                    <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+                    </svg>
+                    <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M20.5 14.7A8.5 8.5 0 0 1 9.3 3.5 8.5 8.5 0 1 0 20.5 14.7Z"></path>
+                    </svg>
+                </button>
                 <div class="nav-search">
                     <i class="fas fa-search"></i>
                     <input type="text" placeholder="Search...">
@@ -361,7 +370,7 @@
                                 <i class="fas fa-dollar-sign"></i>
                             </div>
                             <div class="stat-info">
-                                <h3>$12,450</h3>
+                                <h3>₱12,450.00</h3>
                                 <p>Today's Sales</p>
                                 <span class="stat-change positive">+12.5%</span>
                             </div>
@@ -486,57 +495,6 @@
             </div>
             <div class="product-grid-wrapper">
                 <div class="product-grid" id="productGrid">
-                    <!-- Product cards (populated statically for demo) -->
-                    <div class="product-card" data-name="Hammer" data-price="12.99" data-category="tools">
-                        <i class="fas fa-hammer"></i>
-                        <p>Hammer</p>
-                        <strong>$12.99</strong>
-                    </div>
-                    <div class="product-card" data-name="Screwdriver" data-price="7.50" data-category="tools">
-                        <i class="fas fa-screwdriver"></i>
-                        <p>Screwdriver</p>
-                        <strong>$7.50</strong>
-                    </div>
-                    <div class="product-card" data-name="Wrench Set" data-price="25.00" data-category="tools">
-                        <i class="fas fa-tools"></i>
-                        <p>Wrench Set</p>
-                        <strong>$25.00</strong>
-                    </div>
-                    <div class="product-card" data-name="Paint Brush" data-price="4.99" data-category="painting">
-                        <i class="fas fa-paint-brush"></i>
-                        <p>Paint Brush</p>
-                        <strong>$4.99</strong>
-                    </div>
-                    <div class="product-card" data-name="Nails (1kg)" data-price="6.75" data-category="hardware">
-                        <i class="fas fa-grip-lines"></i>
-                        <p>Nails (1kg)</p>
-                        <strong>$6.75</strong>
-                    </div>
-                    <div class="product-card" data-name="Power Drill" data-price="89.00" data-category="power-tools">
-                        <i class="fas fa-plug"></i>
-                        <p>Power Drill</p>
-                        <strong>$89.00</strong>
-                    </div>
-                    <div class="product-card" data-name="Tape Measure" data-price="8.99" data-category="tools">
-                        <i class="fas fa-ruler"></i>
-                        <p>Tape Measure</p>
-                        <strong>$8.99</strong>
-                    </div>
-                    <div class="product-card" data-name="Safety Gloves" data-price="3.50" data-category="safety">
-                        <i class="fas fa-hand-paper"></i>
-                        <p>Safety Gloves</p>
-                        <strong>$3.50</strong>
-                    </div>
-                    <div class="product-card" data-name="Saw" data-price="34.99" data-category="tools">
-                        <i class="fas fa-cut"></i>
-                        <p>Saw</p>
-                        <strong>$34.99</strong>
-                    </div>
-                    <div class="product-card" data-name="Ladder" data-price="129.00" data-category="equipment">
-                        <i class="fas fa-arrow-up"></i>
-                        <p>Ladder</p>
-                        <strong>$129.00</strong>
-                    </div>
                 </div>
             </div>
         </div>
@@ -554,15 +512,15 @@
             <div class="cart-totals">
                 <div class="total-row">
                     <span>Subtotal:</span>
-                    <strong id="subtotal">$0.00</strong>
+                                    <strong id="subtotal">₱0.00</strong>
                 </div>
                 <div class="total-row">
                     <span>Tax (8%):</span>
-                    <strong id="tax">$0.00</strong>
+                                    <strong id="tax">₱0.00</strong>
                 </div>
                 <div class="total-row grand-total">
                     <span>Total:</span>
-                    <strong id="total">$0.00</strong>
+                                    <strong id="total">₱0.00</strong>
                 </div>
             </div>
             <button class="checkout-btn" id="checkoutBtn">
@@ -956,7 +914,7 @@
                             <div class="form-group">
                                 <label>Currency</label>
                                 <select class="settings-input">
-                                    <option>USD ($)</option>
+                                    <option>PHP (₱)</option>
                                     <option>EUR (€)</option>
                                     <option>GBP (£)</option>
                                 </select>
@@ -1030,7 +988,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="productPrice">Price ($) *</label>
+                        <label for="productPrice">Price (₱) *</label>
                         <input type="number" id="productPrice" required min="0" step="0.01" placeholder="0.00">
                     </div>
                     <div class="form-group">
@@ -1046,8 +1004,8 @@
                         <input type="text" id="productSupplier" placeholder="Supplier name">
                     </div>
                     <div class="form-group">
-                        <label for="productLocation">Storage Location</label>
-                        <input type="text" id="productLocation" placeholder="e.g., Aisle 3, Shelf B">
+                        <label for="productSize">Size (optional)</label>
+                        <input type="text" id="productSize" placeholder="e.g., S, M, L, 10kg, 8oz, or leave blank">
                     </div>
                     <div class="form-group">
                         <label for="productDescription">Description</label>
@@ -1095,7 +1053,7 @@
             <i class="fas fa-credit-card"></i>
         </div>
         <h2>Complete Transaction</h2>
-        <p>Total Amount: <strong id="paymentTotal" style="color: var(--accent); font-size: 2rem;">$0.00</strong></p>
+            <p>Total Amount: <strong id="paymentTotal" style="color: var(--accent); font-size: 2rem;">₱0.00</strong></p>
         
         <!-- Customer Information -->
         <div style="text-align: left; margin: 1.5rem 0;">
@@ -1143,7 +1101,7 @@
                 <span class="input-icon"><i class="fas fa-dollar-sign"></i></span>
                 <input type="number" id="cashReceived" placeholder="Enter amount" step="0.01">
             </div>
-            <p style="margin-top: 1rem;">Change: <strong id="changeAmount">$0.00</strong></p>
+            <p style="margin-top: 1rem;">Change: <strong id="changeAmount">₱0.00</strong></p>
         </div>
         <button class="submit-btn" id="confirmPaymentBtn" style="width: 100%;">
             <i class="fas fa-check"></i> Complete Payment

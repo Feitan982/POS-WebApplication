@@ -26,6 +26,46 @@
     // --- State ---
     let cart = {};          // { productName: quantity }
     let selectedPaymentMethod = 'cash';
+    const formatCurrency = value => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(Number(value) || 0);
+
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
+    }
+
+    function renderProductCatalog(products) {
+        if (!productGrid) return;
+        const categoryIcons = {
+            tools: 'fa-tools', hardware: 'fa-cog', electrical: 'fa-bolt', plumbing: 'fa-wrench',
+            paint: 'fa-paint-brush', garden: 'fa-leaf', building: 'fa-building', fasteners: 'fa-link', safety: 'fa-shield-alt'
+        };
+        productGrid.innerHTML = products.filter(product => Number(product.quantity) > 0).map(product => {
+            const sizes = String(product.size || '').split(',').map(size => size.trim()).filter(Boolean);
+            const sizeOptions = sizes.length ? ` data-size-options="${sizes.map(escapeHtml).join(',')}"` : '';
+            return `<div class="product-card" data-name="${product.name}" data-price="${product.price}" data-category="${product.category}"${sizeOptions}>
+                <i class="fas ${categoryIcons[product.category] || 'fa-box'}"></i>
+                <p>${product.name}</p>
+                <span class="product-card-category">${escapeHtml(product.category || 'Uncategorized')}</span>
+                <span class="product-card-sku">SKU: ${escapeHtml(product.sku || 'N/A')}</span>
+                ${sizes.length ? `<small class="product-card-sizes">Sizes: ${sizes.map(escapeHtml).join(', ')}</small>` : ''}
+                <strong>${formatCurrency(product.price)}</strong>
+            </div>`;
+        }).join('');
+    }
+
+    async function loadProductCatalog() {
+        const supabaseApi = window.POS_SUPABASE;
+        if (!supabaseApi?.isConfigured?.()) {
+            renderProductCatalog([]);
+            return;
+        }
+        const result = await supabaseApi.getInventoryProducts();
+        if (result.error) {
+            renderProductCatalog([]);
+            showToast(result.error.message, 'error');
+            return;
+        }
+        renderProductCatalog(result.data || []);
+    }
 
     // --- Helper: show toast (using existing toast container) ---
     function showToast(message, type = 'success') {
@@ -52,17 +92,34 @@
     }
 
     // --- Cart operations ---
-    function addToCart(name, price) {
-        cart[name] = (cart[name] || 0) + 1;
-        updateCartDisplay();
-        showToast(`Added ${name} to cart (Qty: ${cart[name]})`, 'success');
+    function getCartKey(name, size = '') {
+        return size ? `${name}::${size}` : name;
     }
 
-    function updateQuantity(name, delta) {
-        if (cart[name]) {
-            cart[name] += delta;
-            if (cart[name] <= 0) {
-                delete cart[name];
+    function parseCartKey(cartKey) {
+        const separatorIndex = cartKey.indexOf('::');
+        if (separatorIndex === -1) {
+            return { name: cartKey, size: '' };
+        }
+        return {
+            name: cartKey.slice(0, separatorIndex),
+            size: cartKey.slice(separatorIndex + 2)
+        };
+    }
+
+    function addToCart(name, price, size = '') {
+        const cartKey = getCartKey(name, size);
+        cart[cartKey] = (cart[cartKey] || 0) + 1;
+        updateCartDisplay();
+        const label = size ? `${name} (${size})` : name;
+        showToast(`Added ${label} to cart (Qty: ${cart[cartKey]})`, 'success');
+    }
+
+    function updateQuantity(cartKey, delta) {
+        if (cart[cartKey]) {
+            cart[cartKey] += delta;
+            if (cart[cartKey] <= 0) {
+                delete cart[cartKey];
             }
             updateCartDisplay();
         }
@@ -86,25 +143,27 @@
             `;
         } else {
             cartItems.innerHTML = '';
-            for (const [name, qty] of Object.entries(cart)) {
+            for (const [cartKey, qty] of Object.entries(cart)) {
+                const { name, size } = parseCartKey(cartKey);
                 const price = getProductPriceByName(name);
+                const displayName = size ? `${name} (${size})` : name;
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'cart-item';
                 itemDiv.innerHTML = `
                     <div class="cart-item-info">
-                        <span class="cart-item-name">${name}</span>
-                        <span class="cart-item-qty">$${price.toFixed(2)} each</span>
+                        <span class="cart-item-name">${displayName}</span>
+                        <span class="cart-item-qty">${formatCurrency(price)} each</span>
                     </div>
                     <div class="cart-item-actions">
-                        <button class="qty-btn" data-action="decrease" data-name="${name}">
+                        <button class="qty-btn" data-action="decrease" data-cart-key="${cartKey}">
                             <i class="fas fa-minus"></i>
                         </button>
                         <span style="min-width: 30px; text-align: center; font-weight: 600;">${qty}</span>
-                        <button class="qty-btn" data-action="increase" data-name="${name}">
+                        <button class="qty-btn" data-action="increase" data-cart-key="${cartKey}">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
-                    <strong style="min-width: 80px; text-align: right;">$${(price * qty).toFixed(2)}</strong>
+                    <strong style="min-width: 80px; text-align: right;">${formatCurrency(price * qty)}</strong>
                 `;
                 cartItems.appendChild(itemDiv);
             }
@@ -112,16 +171,17 @@
 
         // Calculate totals
         let subtotal = 0;
-        for (const [name, qty] of Object.entries(cart)) {
+        for (const [cartKey, qty] of Object.entries(cart)) {
+            const { name } = parseCartKey(cartKey);
             const price = getProductPriceByName(name);
             subtotal += price * qty;
         }
         const tax = subtotal * 0.08;
         const total = subtotal + tax;
 
-        subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
-        taxEl.textContent = `$${tax.toFixed(2)}`;
-        totalEl.textContent = `$${total.toFixed(2)}`;
+        subtotalEl.textContent = formatCurrency(subtotal);
+        taxEl.textContent = formatCurrency(tax);
+        totalEl.textContent = formatCurrency(total);
     }
 
     function getProductPriceByName(name) {
@@ -133,14 +193,41 @@
     // --- Event delegation for product cards (click to add) ---
     if (productGrid) {
         productGrid.addEventListener('click', (e) => {
+            if (e.target.closest('.pos-size-selector')) return;
             const card = e.target.closest('.product-card');
             if (card) {
                 const name = card.dataset.name;
                 const price = parseFloat(card.dataset.price);
+                const sizeOptions = (card.dataset.sizeOptions || '')
+                    .split(',')
+                    .map(item => item.trim())
+                    .filter(Boolean);
+
+                if (sizeOptions.length > 0) {
+                    card.querySelector('.pos-size-selector')?.remove();
+                    const selector = document.createElement('select');
+                    selector.className = 'pos-size-selector';
+                    selector.setAttribute('aria-label', `Choose a size for ${name}`);
+                    selector.innerHTML = '<option value="">Choose size</option>' + sizeOptions
+                        .map(size => `<option value="${escapeHtml(size)}">${escapeHtml(size)}</option>`)
+                        .join('');
+                    selector.addEventListener('change', () => {
+                        if (!selector.value) return;
+                        addToCart(name, price, selector.value);
+                        selector.remove();
+                    });
+                    card.appendChild(selector);
+                    selector.focus();
+                    return;
+                }
+
                 addToCart(name, price);
             }
         });
     }
+
+    loadProductCatalog();
+    window.addEventListener('inventory-products-loaded', event => renderProductCatalog(event.detail || []));
 
     // --- Product search filter ---
     if (productSearch) {
@@ -163,12 +250,13 @@
         cartItems.addEventListener('click', (e) => {
             const btn = e.target.closest('.qty-btn');
             if (!btn) return;
-            const name = btn.dataset.name;
+            const cartKey = btn.dataset.cartKey;
             const action = btn.dataset.action;
+            if (!cartKey) return;
             if (action === 'increase') {
-                updateQuantity(name, 1);
+                updateQuantity(cartKey, 1);
             } else if (action === 'decrease') {
-                updateQuantity(name, -1);
+                updateQuantity(cartKey, -1);
             }
         });
     }
@@ -187,7 +275,8 @@
             }
             // Compute total
             let subtotal = 0;
-            for (const [name, qty] of Object.entries(cart)) {
+            for (const [cartKey, qty] of Object.entries(cart)) {
+                const { name } = parseCartKey(cartKey);
                 const price = getProductPriceByName(name);
                 subtotal += price * qty;
             }
@@ -195,7 +284,7 @@
             const total = subtotal + tax;
 
             // Set modal total
-            if (paymentTotal) paymentTotal.textContent = `$${total.toFixed(2)}`;
+            if (paymentTotal) paymentTotal.textContent = formatCurrency(total);
 
             // Reset payment method to cash (default)
             selectedPaymentMethod = 'cash';
@@ -203,7 +292,7 @@
             document.querySelector('.payment-method[data-method="cash"]').classList.add('selected');
             if (cashInputGroup) cashInputGroup.style.display = 'block';
             if (cashReceived) cashReceived.value = '';
-            if (changeAmount) changeAmount.textContent = '$0.00';
+            if (changeAmount) changeAmount.textContent = formatCurrency(0);
 
             // Clear customer info fields
             if (customerName) customerName.value = '';
@@ -250,11 +339,11 @@
         cashReceived.addEventListener('input', (e) => {
             const cash = parseFloat(e.target.value) || 0;
             // Get total from modal
-            const totalText = paymentTotal.textContent.replace('$', '');
+            const totalText = paymentTotal.textContent.replace(/[^\d.-]/g, '');
             const total = parseFloat(totalText) || 0;
             const change = cash - total;
             if (changeAmount) {
-                changeAmount.textContent = change >= 0 ? `$${change.toFixed(2)}` : 'Insufficient amount';
+                changeAmount.textContent = change >= 0 ? formatCurrency(change) : 'Insufficient amount';
             }
         });
     }
@@ -262,7 +351,7 @@
     // --- Confirm payment ---
     if (confirmPaymentBtn) {
         confirmPaymentBtn.addEventListener('click', () => {
-            const totalText = paymentTotal.textContent.replace('$', '');
+            const totalText = paymentTotal.textContent.replace(/[^\d.-]/g, '');
             const total = parseFloat(totalText) || 0;
             const name = customerName ? customerName.value.trim() : '';
             const phone = customerPhone ? customerPhone.value.trim() : '';
@@ -275,7 +364,7 @@
                     return;
                 }
                 const change = cash - total;
-                let message = `Payment successful! Change: $${change.toFixed(2)}`;
+                let message = `Payment successful! Change: ${formatCurrency(change)}`;
                 if (name) message += ` | Customer: ${name}`;
                 showToast(message, 'success');
             } else {
