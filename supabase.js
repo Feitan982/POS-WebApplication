@@ -107,7 +107,32 @@ window.POS_SUPABASE = (() => {
             return { data: null, error: new Error('Supabase is not configured.') };
         }
 
-        return client.auth.signInWithPassword({ email, password });
+        const result = await client.auth.signInWithPassword({ email, password });
+        if (result.error || !result.data?.user) {
+            return result;
+        }
+
+        const { data: profile, error: profileError } = await client
+            .from(state.config.tableName)
+            .select('role, full_name')
+            .eq('id', result.data.user.id)
+            .maybeSingle();
+
+        if (profileError) {
+            console.warn('Supabase profile lookup failed:', profileError.message);
+            return result;
+        }
+
+        if (profile) {
+            result.data.user.role = profile.role;
+            result.data.user.user_metadata = {
+                ...(result.data.user.user_metadata || {}),
+                ...(profile.full_name ? { full_name: profile.full_name } : {}),
+                ...(profile.role ? { role: profile.role } : {})
+            };
+        }
+
+        return result;
     }
 
     async function signOut() {

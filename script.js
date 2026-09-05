@@ -58,6 +58,23 @@
         }
         const client = supabaseApi.getClient();
         const { data: { user } } = await client.auth.getUser();
+
+        if (user && typeof supabaseApi.getUsers === 'function') {
+            const { data: profiles, error: profileError } = await supabaseApi.getUsers();
+            const profile = !profileError && Array.isArray(profiles)
+                ? profiles.find(item => item.id === user.id || item.email?.toLowerCase() === user.email?.toLowerCase())
+                : null;
+
+            if (profile) {
+                user.role = profile.role;
+                user.user_metadata = {
+                    ...(user.user_metadata || {}),
+                    ...(profile.full_name ? { full_name: profile.full_name } : {}),
+                    ...(profile.role ? { role: profile.role } : {})
+                };
+            }
+        }
+
         return { user, error: null };
     }
 
@@ -165,7 +182,7 @@
 
     function getUserRole(user = currentUser) {
         const role = user?.role || user?.user_metadata?.role || user?.app_metadata?.role;
-        return role === 'admin' ? 'admin' : 'cashier';
+        return String(role || '').trim().toLowerCase() === 'admin' ? 'admin' : 'cashier';
     }
 
     function canAccessPage(page, user = currentUser) {
