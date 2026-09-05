@@ -697,7 +697,7 @@
         });
     }
 
-    // ==================== INVENTORY MANAGEMENT ====================
+    /* Legacy inventory implementation removed; inventory.js owns this feature. */
     /*
     
     // Inventory State
@@ -714,84 +714,10 @@
     };
 
     // Sample inventory data
-    const sampleProducts = [
-        {
-            id: 1,
-            name: 'Power Drill',
-            sku: 'PRD-001',
-            category: 'tools',
-            price: 89.99,
-            quantity: 25,
-            minStock: 10,
-            supplier: 'ToolMaster Inc.',
-            location: 'Aisle 1, Shelf A',
-            description: 'Professional power drill with variable speed',
-            lastUpdated: '2026-09-01'
-        },
-        {
-            id: 2,
-            name: 'Hammer',
-            sku: 'PRD-002',
-            category: 'tools',
-            price: 15.99,
-            quantity: 50,
-            minStock: 20,
-            supplier: 'Hardware Supply Co.',
-            location: 'Aisle 1, Shelf B',
-            description: '16 oz claw hammer with fiberglass handle',
-            lastUpdated: '2026-08-28'
-        },
-        {
-            id: 3,
-            name: 'Screwdriver Set',
-            sku: 'PRD-003',
-            category: 'tools',
-            price: 24.99,
-            quantity: 8,
-            minStock: 15,
-            supplier: 'ToolMaster Inc.',
-            location: 'Aisle 2, Shelf A',
-            description: '6-piece screwdriver set with magnetic tips',
-            lastUpdated: '2026-09-02'
-        },
-        {
-            id: 4,
-            name: 'Paint Brush Set',
-            sku: 'PRD-004',
-            category: 'paint',
-            price: 12.99,
-            quantity: 0,
-            minStock: 10,
-            supplier: 'PaintPro Supplies',
-            location: 'Aisle 5, Shelf C',
-            description: '5-piece paint brush set for all paint types',
-            lastUpdated: '2026-08-25'
-        },
-        {
-            id: 5,
-            name: 'Safety Goggles',
-            sku: 'PRD-005',
-            category: 'safety',
-            price: 8.99,
-            quantity: 75,
-            minStock: 30,
-            supplier: 'SafetyFirst Gear',
-            location: 'Aisle 3, Shelf D',
-            description: 'Anti-fog safety goggles with UV protection',
-            lastUpdated: '2026-08-30'
-        }
-    ];
-
     // Initialize Inventory
     function initInventory() {
         // Load products from localStorage or use sample data
-        const savedProducts = localStorage.getItem('inventoryProducts');
-        if (savedProducts) {
-            inventoryState.products = JSON.parse(savedProducts);
-        } else {
-            inventoryState.products = [...sampleProducts];
-            saveProducts();
-        }
+        inventoryState.products = [];
         
         updateInventoryStats();
         filterProducts();
@@ -800,7 +726,6 @@
 
     // Save products to localStorage
     function saveProducts() {
-        localStorage.setItem('inventoryProducts', JSON.stringify(inventoryState.products));
     }
 
     // Update inventory statistics
@@ -1149,7 +1074,7 @@
                 document.getElementById('productQuantity').value = product.quantity;
                 document.getElementById('productMinStock').value = product.minStock;
                 document.getElementById('productSupplier').value = product.supplier || '';
-                document.getElementById('productLocation').value = product.location || '';
+                document.getElementById('productSize').value = product.size || '';
                 document.getElementById('productDescription').value = product.description || '';
             }
         } else {
@@ -1178,7 +1103,7 @@
             quantity: parseInt(document.getElementById('productQuantity').value),
             minStock: parseInt(document.getElementById('productMinStock').value),
             supplier: document.getElementById('productSupplier').value.trim(),
-            location: document.getElementById('productLocation').value.trim(),
+            size: document.getElementById('productSize').value.trim(),
             description: document.getElementById('productDescription').value.trim()
         };
         

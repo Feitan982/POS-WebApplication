@@ -27,6 +27,38 @@
     let cart = {};          // { productName: quantity }
     let selectedPaymentMethod = 'cash';
 
+    function renderProductCatalog(products) {
+        if (!productGrid) return;
+        const categoryIcons = {
+            tools: 'fa-tools', hardware: 'fa-cog', electrical: 'fa-bolt', plumbing: 'fa-wrench',
+            paint: 'fa-paint-brush', garden: 'fa-leaf', building: 'fa-building', fasteners: 'fa-link', safety: 'fa-shield-alt'
+        };
+        productGrid.innerHTML = products.filter(product => Number(product.quantity) > 0).map(product => {
+            const sizeOptions = product.size ? ` data-size-options="${product.size}"` : '';
+            return `<div class="product-card" data-name="${product.name}" data-price="${product.price}" data-category="${product.category}"${sizeOptions}>
+                <i class="fas ${categoryIcons[product.category] || 'fa-box'}"></i>
+                <p>${product.name}</p>
+                ${product.size ? `<small>Size: ${product.size}</small>` : ''}
+                <strong>$${Number(product.price).toFixed(2)}</strong>
+            </div>`;
+        }).join('');
+    }
+
+    async function loadProductCatalog() {
+        const supabaseApi = window.POS_SUPABASE;
+        if (!supabaseApi?.isConfigured?.()) {
+            renderProductCatalog([]);
+            return;
+        }
+        const result = await supabaseApi.getInventoryProducts();
+        if (result.error) {
+            renderProductCatalog([]);
+            showToast(result.error.message, 'error');
+            return;
+        }
+        renderProductCatalog(result.data || []);
+    }
+
     // --- Helper: show toast (using existing toast container) ---
     function showToast(message, type = 'success') {
         const container = document.getElementById('toastContainer');
@@ -52,17 +84,34 @@
     }
 
     // --- Cart operations ---
-    function addToCart(name, price) {
-        cart[name] = (cart[name] || 0) + 1;
-        updateCartDisplay();
-        showToast(`Added ${name} to cart (Qty: ${cart[name]})`, 'success');
+    function getCartKey(name, size = '') {
+        return size ? `${name}::${size}` : name;
     }
 
-    function updateQuantity(name, delta) {
-        if (cart[name]) {
-            cart[name] += delta;
-            if (cart[name] <= 0) {
-                delete cart[name];
+    function parseCartKey(cartKey) {
+        const separatorIndex = cartKey.indexOf('::');
+        if (separatorIndex === -1) {
+            return { name: cartKey, size: '' };
+        }
+        return {
+            name: cartKey.slice(0, separatorIndex),
+            size: cartKey.slice(separatorIndex + 2)
+        };
+    }
+
+    function addToCart(name, price, size = '') {
+        const cartKey = getCartKey(name, size);
+        cart[cartKey] = (cart[cartKey] || 0) + 1;
+        updateCartDisplay();
+        const label = size ? `${name} (${size})` : name;
+        showToast(`Added ${label} to cart (Qty: ${cart[cartKey]})`, 'success');
+    }
+
+    function updateQuantity(cartKey, delta) {
+        if (cart[cartKey]) {
+            cart[cartKey] += delta;
+            if (cart[cartKey] <= 0) {
+                delete cart[cartKey];
             }
             updateCartDisplay();
         }
@@ -86,21 +135,23 @@
             `;
         } else {
             cartItems.innerHTML = '';
-            for (const [name, qty] of Object.entries(cart)) {
+            for (const [cartKey, qty] of Object.entries(cart)) {
+                const { name, size } = parseCartKey(cartKey);
                 const price = getProductPriceByName(name);
+                const displayName = size ? `${name} (${size})` : name;
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'cart-item';
                 itemDiv.innerHTML = `
                     <div class="cart-item-info">
-                        <span class="cart-item-name">${name}</span>
+                        <span class="cart-item-name">${displayName}</span>
                         <span class="cart-item-qty">$${price.toFixed(2)} each</span>
                     </div>
                     <div class="cart-item-actions">
-                        <button class="qty-btn" data-action="decrease" data-name="${name}">
+                        <button class="qty-btn" data-action="decrease" data-cart-key="${cartKey}">
                             <i class="fas fa-minus"></i>
                         </button>
                         <span style="min-width: 30px; text-align: center; font-weight: 600;">${qty}</span>
-                        <button class="qty-btn" data-action="increase" data-name="${name}">
+                        <button class="qty-btn" data-action="increase" data-cart-key="${cartKey}">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
@@ -112,7 +163,8 @@
 
         // Calculate totals
         let subtotal = 0;
-        for (const [name, qty] of Object.entries(cart)) {
+        for (const [cartKey, qty] of Object.entries(cart)) {
+            const { name } = parseCartKey(cartKey);
             const price = getProductPriceByName(name);
             subtotal += price * qty;
         }
@@ -137,10 +189,27 @@
             if (card) {
                 const name = card.dataset.name;
                 const price = parseFloat(card.dataset.price);
+                const sizeOptions = (card.dataset.sizeOptions || '')
+                    .split(',')
+                    .map(item => item.trim())
+                    .filter(Boolean);
+
+                if (sizeOptions.length > 0) {
+                    const selectedSize = window.prompt(`Choose a size for ${name}: ${sizeOptions.join(', ')}`, sizeOptions[0]);
+                    if (selectedSize === null) return;
+                    const normalizedSize = selectedSize.trim();
+                    if (!normalizedSize) return;
+                    addToCart(name, price, normalizedSize);
+                    return;
+                }
+
                 addToCart(name, price);
             }
         });
     }
+
+    loadProductCatalog();
+    window.addEventListener('inventory-products-loaded', event => renderProductCatalog(event.detail || []));
 
     // --- Product search filter ---
     if (productSearch) {
@@ -163,12 +232,13 @@
         cartItems.addEventListener('click', (e) => {
             const btn = e.target.closest('.qty-btn');
             if (!btn) return;
-            const name = btn.dataset.name;
+            const cartKey = btn.dataset.cartKey;
             const action = btn.dataset.action;
+            if (!cartKey) return;
             if (action === 'increase') {
-                updateQuantity(name, 1);
+                updateQuantity(cartKey, 1);
             } else if (action === 'decrease') {
-                updateQuantity(name, -1);
+                updateQuantity(cartKey, -1);
             }
         });
     }
@@ -187,7 +257,8 @@
             }
             // Compute total
             let subtotal = 0;
-            for (const [name, qty] of Object.entries(cart)) {
+            for (const [cartKey, qty] of Object.entries(cart)) {
+                const { name } = parseCartKey(cartKey);
                 const price = getProductPriceByName(name);
                 subtotal += price * qty;
             }

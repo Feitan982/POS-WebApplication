@@ -13,13 +13,15 @@
         initialized: false
     };
 
-    const sampleProducts = [
-        { id: 1, name: 'Power Drill', sku: 'PRD-001', category: 'tools', price: 89.99, quantity: 25, minStock: 10, supplier: 'ToolMaster Inc.', location: 'Aisle 1, Shelf A', description: 'Professional power drill with variable speed', lastUpdated: '2026-09-01' },
-        { id: 2, name: 'Hammer', sku: 'PRD-002', category: 'tools', price: 15.99, quantity: 50, minStock: 20, supplier: 'Hardware Supply Co.', location: 'Aisle 1, Shelf B', description: '16 oz claw hammer with fiberglass handle', lastUpdated: '2026-08-28' },
-        { id: 3, name: 'Screwdriver Set', sku: 'PRD-003', category: 'tools', price: 24.99, quantity: 8, minStock: 15, supplier: 'ToolMaster Inc.', location: 'Aisle 2, Shelf A', description: '6-piece screwdriver set with magnetic tips', lastUpdated: '2026-09-02' },
-        { id: 4, name: 'Paint Brush Set', sku: 'PRD-004', category: 'paint', price: 12.99, quantity: 0, minStock: 10, supplier: 'PaintPro Supplies', location: 'Aisle 5, Shelf C', description: '5-piece paint brush set for all paint types', lastUpdated: '2026-08-25' },
-        { id: 5, name: 'Safety Goggles', sku: 'PRD-005', category: 'safety', price: 8.99, quantity: 75, minStock: 30, supplier: 'SafetyFirst Gear', location: 'Aisle 3, Shelf D', description: 'Anti-fog safety goggles with UV protection', lastUpdated: '2026-08-30' }
-    ];
+    const supabaseApi = window.POS_SUPABASE;
+
+    function mapProduct(product) {
+        return {
+            ...product,
+            minStock: product.minStock ?? product.min_stock ?? 0,
+            lastUpdated: product.lastUpdated || product.updated_at || product.created_at || ''
+        };
+    }
 
     function showToast(message, type = 'success') {
         const container = document.getElementById('toastContainer');
@@ -35,10 +37,6 @@
             toast.style.transform = 'translateX(20px)';
             setTimeout(() => toast.remove(), 300);
         }, 4000);
-    }
-
-    function saveProducts() {
-        localStorage.setItem('inventoryProducts', JSON.stringify(inventoryState.products));
     }
 
     function getStockStatus(quantity, minStock) {
@@ -103,8 +101,9 @@
             const categoryIcons = { tools: 'fa-tools', hardware: 'fa-cog', electrical: 'fa-bolt', plumbing: 'fa-wrench', paint: 'fa-paint-brush', garden: 'fa-leaf', building: 'fa-building', fasteners: 'fa-link', safety: 'fa-shield-alt' };
             tbody.innerHTML = pageProducts.map(product => {
                 const status = getStockStatus(product.quantity, product.minStock);
+                const sizeLabel = product.size ? `<span class="product-sku">Size: ${product.size}</span>` : '';
                 return `<tr>
-                    <td><div class="product-info"><div class="product-image"><i class="fas ${categoryIcons[product.category] || 'fa-box'}"></i></div><div class="product-details"><p class="product-name">${product.name}</p><span class="product-sku">SKU: ${product.sku}</span></div></div></td>
+                    <td><div class="product-info"><div class="product-image"><i class="fas ${categoryIcons[product.category] || 'fa-box'}"></i></div><div class="product-details"><p class="product-name">${product.name}</p>${sizeLabel}<span class="product-sku">SKU: ${product.sku}</span></div></div></td>
                     <td>${product.category}</td><td>$${Number(product.price).toFixed(2)}</td>
                     <td><input type="number" class="quantity-input" value="${product.quantity}" min="0" data-product-id="${product.id}" onchange="updateQuantity(${product.id}, this.value)"></td>
                     <td>${getStockBadge(status)}</td><td>${product.lastUpdated}</td>
@@ -143,7 +142,7 @@
                 document.getElementById('productQuantity').value = product.quantity;
                 document.getElementById('productMinStock').value = product.minStock;
                 document.getElementById('productSupplier').value = product.supplier || '';
-                document.getElementById('productLocation').value = product.location || '';
+                document.getElementById('productSize').value = product.size || '';
                 document.getElementById('productDescription').value = product.description || '';
             }
         } else title.textContent = 'Add Product';
@@ -155,24 +154,31 @@
         inventoryState.editingProductId = null;
     }
 
-    function saveProduct(event) {
+    async function saveProduct(event) {
         event.preventDefault();
         const productData = {
             name: document.getElementById('productName').value.trim(), sku: document.getElementById('productSKU').value.trim(), category: document.getElementById('productCategory').value,
             price: parseFloat(document.getElementById('productPrice').value), quantity: parseInt(document.getElementById('productQuantity').value), minStock: parseInt(document.getElementById('productMinStock').value),
-            supplier: document.getElementById('productSupplier').value.trim(), location: document.getElementById('productLocation').value.trim(), description: document.getElementById('productDescription').value.trim()
+            supplier: document.getElementById('productSupplier').value.trim(), size: document.getElementById('productSize').value.trim(), description: document.getElementById('productDescription').value.trim()
         };
         const skuExists = inventoryState.products.some(p => p.sku === productData.sku && p.id !== inventoryState.editingProductId);
         if (skuExists) { showToast('SKU already exists', 'error'); return; }
+        const payload = { ...productData, min_stock: productData.minStock };
+        delete payload.minStock;
+        let result;
         if (inventoryState.editingProductId) {
+            result = await supabaseApi.updateInventoryProduct(inventoryState.editingProductId, payload);
             const index = inventoryState.products.findIndex(p => p.id === inventoryState.editingProductId);
-            if (index !== -1) inventoryState.products[index] = { ...inventoryState.products[index], ...productData, lastUpdated: new Date().toISOString().split('T')[0] };
-            showToast('Product updated successfully', 'success');
+            if (!result.error && index !== -1) inventoryState.products[index] = mapProduct(result.data?.[0] || { ...inventoryState.products[index], ...productData });
+            showToast(result.error ? result.error.message : 'Product updated successfully', result.error ? 'error' : 'success');
         } else {
-            inventoryState.products.push({ id: Date.now(), ...productData, lastUpdated: new Date().toISOString().split('T')[0] });
-            showToast('Product added successfully', 'success');
+            result = await supabaseApi.addInventoryProduct(payload);
+            if (!result.error && result.data?.[0]) inventoryState.products.unshift(mapProduct(result.data[0]));
+            showToast(result.error ? result.error.message : 'Product added successfully', result.error ? 'error' : 'success');
         }
-        saveProducts(); updateInventoryStats(); filterProducts(); closeProductModal();
+        if (result.error) return;
+        updateInventoryStats(); filterProducts(); closeProductModal();
+        window.dispatchEvent(new CustomEvent('inventory-products-loaded', { detail: inventoryState.products }));
     }
 
     function closeDeleteModal() {
@@ -180,19 +186,26 @@
         inventoryState.deletingProductId = null;
     }
 
-    function confirmDelete() {
+    async function confirmDelete() {
         if (inventoryState.deletingProductId) {
+            const result = await supabaseApi.deleteInventoryProduct(inventoryState.deletingProductId);
+            if (result.error) {
+                showToast(result.error.message, 'error');
+                return;
+            }
             inventoryState.products = inventoryState.products.filter(p => p.id !== inventoryState.deletingProductId);
-            saveProducts(); updateInventoryStats(); filterProducts(); showToast('Product deleted successfully', 'success');
+            updateInventoryStats(); filterProducts();
+            window.dispatchEvent(new CustomEvent('inventory-products-loaded', { detail: inventoryState.products }));
+            showToast('Product deleted successfully', 'success');
         }
         closeDeleteModal();
     }
 
     function exportInventory() {
         if (!inventoryState.products.length) { showToast('No products to export', 'error'); return; }
-        const headers = ['ID', 'Name', 'SKU', 'Category', 'Price', 'Quantity', 'Min Stock', 'Supplier', 'Location', 'Description', 'Last Updated'];
+        const headers = ['ID', 'Name', 'SKU', 'Category', 'Price', 'Quantity', 'Min Stock', 'Supplier', 'Size', 'Description', 'Last Updated'];
         const escapeCsv = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
-        const rows = inventoryState.products.map(product => [product.id, product.name, product.sku, product.category, product.price, product.quantity, product.minStock, product.supplier, product.location, product.description, product.lastUpdated]);
+        const rows = inventoryState.products.map(product => [product.id, product.name, product.sku, product.category, product.price, product.quantity, product.minStock, product.supplier, product.size || '', product.description, product.lastUpdated]);
         const blob = new Blob([[headers, ...rows].map(row => row.map(escapeCsv).join(',')).join('\n')], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
@@ -221,10 +234,22 @@
     }
 
     window.initInventory = function() {
-        const savedProducts = localStorage.getItem('inventoryProducts');
-        if (savedProducts) {
-            try { inventoryState.products = JSON.parse(savedProducts); } catch (error) { inventoryState.products = [...sampleProducts]; saveProducts(); }
-        } else { inventoryState.products = [...sampleProducts]; saveProducts(); }
+        if (!supabaseApi?.isConfigured?.()) {
+            inventoryState.products = [];
+            showToast('Supabase is not configured', 'error');
+            updateInventoryStats(); filterProducts(); setupInventoryEventListeners();
+            return;
+        }
+        supabaseApi.getInventoryProducts().then(result => {
+            if (result.error) {
+                showToast(result.error.message, 'error');
+                inventoryState.products = [];
+            } else {
+                inventoryState.products = (result.data || []).map(mapProduct);
+                window.dispatchEvent(new CustomEvent('inventory-products-loaded', { detail: inventoryState.products }));
+            }
+            updateInventoryStats(); filterProducts(); setupInventoryEventListeners();
+        });
         updateInventoryStats(); filterProducts(); setupInventoryEventListeners();
     };
     window.changePage = function(page) {
@@ -238,7 +263,13 @@
         const product = inventoryState.products.find(p => p.id === productId);
         if (!product) return;
         product.quantity = quantity; product.lastUpdated = new Date().toISOString().split('T')[0];
-        saveProducts(); updateInventoryStats(); filterProducts(); showToast('Quantity updated successfully', 'success');
+        supabaseApi.updateInventoryProduct(productId, { quantity }).then(result => {
+            if (result.error) { showToast(result.error.message, 'error'); return; }
+            product.lastUpdated = new Date().toISOString();
+            updateInventoryStats(); filterProducts();
+            window.dispatchEvent(new CustomEvent('inventory-products-loaded', { detail: inventoryState.products }));
+            showToast('Quantity updated successfully', 'success');
+        });
     };
     window.editProduct = openProductModal;
     window.showDeleteModal = function(productId) {

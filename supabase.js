@@ -19,7 +19,8 @@ window.POS_SUPABASE = (() => {
         const merged = { ...DEFAULT_CONFIG, ...customConfig };
         return {
             ...merged,
-            enabled: Boolean(customConfig.enabled) && !isPlaceholder(merged.url) && !isPlaceholder(merged.anonKey)
+            enabled: customConfig.enabled === undefined ? merged.enabled : Boolean(customConfig.enabled),
+            ...(!isPlaceholder(merged.url) && !isPlaceholder(merged.anonKey) ? {} : { enabled: false })
         };
     }
 
