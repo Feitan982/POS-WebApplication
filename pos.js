@@ -28,6 +28,10 @@
     let selectedPaymentMethod = 'cash';
     const formatCurrency = value => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(Number(value) || 0);
 
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
+    }
+
     function renderProductCatalog(products) {
         if (!productGrid) return;
         const categoryIcons = {
@@ -35,11 +39,12 @@
             paint: 'fa-paint-brush', garden: 'fa-leaf', building: 'fa-building', fasteners: 'fa-link', safety: 'fa-shield-alt'
         };
         productGrid.innerHTML = products.filter(product => Number(product.quantity) > 0).map(product => {
-            const sizeOptions = product.size ? ` data-size-options="${product.size}"` : '';
+            const sizes = String(product.size || '').split(',').map(size => size.trim()).filter(Boolean);
+            const sizeOptions = sizes.length ? ` data-size-options="${sizes.map(escapeHtml).join(',')}"` : '';
             return `<div class="product-card" data-name="${product.name}" data-price="${product.price}" data-category="${product.category}"${sizeOptions}>
                 <i class="fas ${categoryIcons[product.category] || 'fa-box'}"></i>
                 <p>${product.name}</p>
-                ${product.size ? `<small>Size: ${product.size}</small>` : ''}
+                ${sizes.length ? `<small>Sizes: ${sizes.map(escapeHtml).join(', ')}</small>` : ''}
                 <strong>${formatCurrency(product.price)}</strong>
             </div>`;
         }).join('');
@@ -186,6 +191,7 @@
     // --- Event delegation for product cards (click to add) ---
     if (productGrid) {
         productGrid.addEventListener('click', (e) => {
+            if (e.target.closest('.pos-size-selector')) return;
             const card = e.target.closest('.product-card');
             if (card) {
                 const name = card.dataset.name;
@@ -196,11 +202,20 @@
                     .filter(Boolean);
 
                 if (sizeOptions.length > 0) {
-                    const selectedSize = window.prompt(`Choose a size for ${name}: ${sizeOptions.join(', ')}`, sizeOptions[0]);
-                    if (selectedSize === null) return;
-                    const normalizedSize = selectedSize.trim();
-                    if (!normalizedSize) return;
-                    addToCart(name, price, normalizedSize);
+                    card.querySelector('.pos-size-selector')?.remove();
+                    const selector = document.createElement('select');
+                    selector.className = 'pos-size-selector';
+                    selector.setAttribute('aria-label', `Choose a size for ${name}`);
+                    selector.innerHTML = '<option value="">Choose size</option>' + sizeOptions
+                        .map(size => `<option value="${escapeHtml(size)}">${escapeHtml(size)}</option>`)
+                        .join('');
+                    selector.addEventListener('change', () => {
+                        if (!selector.value) return;
+                        addToCart(name, price, selector.value);
+                        selector.remove();
+                    });
+                    card.appendChild(selector);
+                    selector.focus();
                     return;
                 }
 

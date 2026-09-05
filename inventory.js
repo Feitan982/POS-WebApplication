@@ -19,9 +19,14 @@
     function mapProduct(product) {
         return {
             ...product,
+            size: normalizeSizes(product.size),
             minStock: product.minStock ?? product.min_stock ?? 0,
             lastUpdated: product.lastUpdated || product.updated_at || product.created_at || ''
         };
+    }
+
+    function normalizeSizes(size) {
+        return [...new Set(String(size || '').split(',').map(value => value.trim()).filter(Boolean))].join(',');
     }
 
     function showToast(message, type = 'success') {
@@ -160,7 +165,7 @@
         const productData = {
             name: document.getElementById('productName').value.trim(), sku: document.getElementById('productSKU').value.trim(), category: document.getElementById('productCategory').value,
             price: parseFloat(document.getElementById('productPrice').value), quantity: parseInt(document.getElementById('productQuantity').value), minStock: parseInt(document.getElementById('productMinStock').value),
-            supplier: document.getElementById('productSupplier').value.trim(), size: document.getElementById('productSize').value.trim(), description: document.getElementById('productDescription').value.trim()
+            supplier: document.getElementById('productSupplier').value.trim(), size: normalizeSizes(document.getElementById('productSize').value), description: document.getElementById('productDescription').value.trim()
         };
         const skuExists = inventoryState.products.some(p => p.sku === productData.sku && p.id !== inventoryState.editingProductId);
         if (skuExists) { showToast('SKU already exists', 'error'); return; }
