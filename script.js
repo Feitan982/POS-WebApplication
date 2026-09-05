@@ -153,35 +153,9 @@
     const sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
     const mobileToggle = document.getElementById('mobileToggle');
     const sidebar = document.getElementById('sidebar');
-    const emailConfirmationModal = document.getElementById('emailConfirmationModal');
-    const emailConfirmationAddress = document.getElementById('emailConfirmationAddress');
-    const emailConfirmationClose = document.getElementById('emailConfirmationClose');
-    const emailConfirmationContinue = document.getElementById('emailConfirmationContinue');
     
     let selectedRole = 'admin';
     let currentUser = null;
-
-    function showEmailConfirmationModal(email) {
-        if (!emailConfirmationModal) return;
-        if (emailConfirmationAddress) emailConfirmationAddress.textContent = email;
-        emailConfirmationModal.hidden = false;
-        emailConfirmationClose?.focus();
-    }
-
-    function closeEmailConfirmationModal() {
-        if (emailConfirmationModal) emailConfirmationModal.hidden = true;
-    }
-
-    emailConfirmationClose?.addEventListener('click', closeEmailConfirmationModal);
-    emailConfirmationContinue?.addEventListener('click', closeEmailConfirmationModal);
-    emailConfirmationModal?.addEventListener('click', (event) => {
-        if (event.target === emailConfirmationModal) closeEmailConfirmationModal();
-    });
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && emailConfirmationModal && !emailConfirmationModal.hidden) {
-            closeEmailConfirmationModal();
-        }
-    });
 
     // ---------- TOAST ----------
     function showToast(message, type = 'success') {
@@ -522,11 +496,7 @@
                         localStorage.setItem(ADMIN_CREATED_KEY, 'true');
                         updateSignupRoleAvailability();
                     }
-                    if (data?.session) {
-                        showToast(`Account created for ${name} (${role})! Please sign in.`, 'success');
-                    } else {
-                        showEmailConfirmationModal(email);
-                    }
+                    showToast(`Account created for ${name} (${role})! Please sign in.`, 'success');
                     return;
                 }
 
@@ -684,7 +654,7 @@
             
             // Initialize inventory if navigating to inventory page
             if (page === 'inventory') {
-                initInventory();
+                window.initInventory?.();
             }
             
             // Close mobile sidebar
@@ -703,7 +673,7 @@
         if (target) target.classList.add('active');
         
         if (page === 'inventory') {
-            initInventory();
+            window.initInventory?.();
         }
     };
 
@@ -728,6 +698,7 @@
     }
 
     // ==================== INVENTORY MANAGEMENT ====================
+    /*
     
     // Inventory State
     let inventoryState = {
@@ -1307,6 +1278,8 @@
         
         showToast('Inventory exported successfully', 'success');
     }
+
+    */
 
     // ---------- CHECK AUTH STATUS ON LOAD ----------
     async function checkAuth() {
