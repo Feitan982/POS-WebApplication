@@ -150,24 +150,24 @@
             for (const [cartKey, qty] of Object.entries(cart)) {
                 const { name, size } = parseCartKey(cartKey);
                 const price = getProductPriceByName(name);
-                const displayName = size ? `${name} (${size})` : name;
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'cart-item';
                 itemDiv.innerHTML = `
                     <div class="cart-item-info">
-                        <span class="cart-item-name">${displayName}</span>
+                        <span class="cart-item-name">${escapeHtml(name)}</span>
+                        ${size ? `<span class="cart-item-size"><i class="fas fa-ruler-horizontal" aria-hidden="true"></i> Size: ${escapeHtml(size)}</span>` : ''}
                         <span class="cart-item-qty">${formatCurrency(price)} each</span>
                     </div>
                     <div class="cart-item-actions">
                         <button class="qty-btn" data-action="decrease" data-cart-key="${cartKey}">
                             <i class="fas fa-minus"></i>
                         </button>
-                        <span style="min-width: 30px; text-align: center; font-weight: 600;">${qty}</span>
+                        <span class="cart-item-quantity">${qty}</span>
                         <button class="qty-btn" data-action="increase" data-cart-key="${cartKey}">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
-                    <strong style="min-width: 80px; text-align: right;">${formatCurrency(price * qty)}</strong>
+                    <strong class="cart-item-total">${formatCurrency(price * qty)}</strong>
                 `;
                 cartItems.appendChild(itemDiv);
             }
