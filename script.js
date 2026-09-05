@@ -153,9 +153,42 @@
     const sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
     const mobileToggle = document.getElementById('mobileToggle');
     const sidebar = document.getElementById('sidebar');
+    const themeToggle = document.getElementById('themeToggle');
     
     let selectedRole = 'admin';
     let currentUser = null;
+
+    // ---------- THEME ----------
+    const THEME_KEY = 'pos_theme';
+
+    function applyTheme(theme) {
+        const isLight = theme === 'light';
+        document.documentElement.dataset.theme = isLight ? 'light' : 'dark';
+
+        if (themeToggle) {
+            const nextMode = isLight ? 'dark' : 'light';
+            themeToggle.setAttribute('aria-label', `Switch to ${nextMode} mode`);
+            themeToggle.setAttribute('title', `Switch to ${nextMode} mode`);
+        }
+    }
+
+    function initializeTheme() {
+        let savedTheme = 'dark';
+        try {
+            savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+        } catch (e) {}
+
+        applyTheme(savedTheme);
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const nextTheme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+                applyTheme(nextTheme);
+                try {
+                    localStorage.setItem(THEME_KEY, nextTheme);
+                } catch (e) {}
+            });
+        }
+    }
 
     // ---------- TOAST ----------
     function showToast(message, type = 'success') {
@@ -1254,6 +1287,8 @@
 
     // ---------- INIT ----------
     function init() {
+        initializeTheme();
+
         // Check authentication status
         checkAuth();
 

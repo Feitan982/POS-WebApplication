@@ -44,7 +44,9 @@
             return `<div class="product-card" data-name="${product.name}" data-price="${product.price}" data-category="${product.category}"${sizeOptions}>
                 <i class="fas ${categoryIcons[product.category] || 'fa-box'}"></i>
                 <p>${product.name}</p>
-                ${sizes.length ? `<small>Sizes: ${sizes.map(escapeHtml).join(', ')}</small>` : ''}
+                <span class="product-card-category">${escapeHtml(product.category || 'Uncategorized')}</span>
+                <span class="product-card-sku">SKU: ${escapeHtml(product.sku || 'N/A')}</span>
+                ${sizes.length ? `<small class="product-card-sizes">Sizes: ${sizes.map(escapeHtml).join(', ')}</small>` : ''}
                 <strong>${formatCurrency(product.price)}</strong>
             </div>`;
         }).join('');

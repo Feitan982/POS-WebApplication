@@ -2442,6 +2442,26 @@ body {
     font-size: 14px;
 }
 
+.product-card-category,
+.product-card-sku,
+.product-card-sizes {
+    display: block;
+    color: #cbd5e1;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.product-card-category {
+    color: #a5b4fc;
+    text-transform: capitalize;
+}
+
+.product-card-sizes {
+    margin: 6px 0;
+    color: #f8fafc;
+    font-weight: 600;
+}
+
 .product-card strong {
     color: #a5b4fc;
     font-size: 16px;
@@ -2711,5 +2731,228 @@ body {
 @media (max-width: 768px) {
     .product-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+
+/* ===== THEME TOGGLE ===== */
+.theme-toggle {
+    position: relative;
+    z-index: 10001;
+    display: inline-grid;
+    place-items: center;
+    align-items: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: rgba(30, 41, 59, 0.92);
+    color: #e2e8f0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(12px);
+    cursor: pointer;
+    font: 600 12px/1 'Inter', sans-serif;
+    transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(129, 140, 248, 0.7);
+    outline: none;
+}
+
+.nav-right > .theme-toggle {
+    position: static !important;
+    inset: auto !important;
+    order: -1;
+    margin: 0;
+    align-self: center;
+}
+
+.theme-icon {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+}
+
+.theme-icon-sun {
+    color: #fbbf24;
+}
+
+.theme-icon-moon {
+    display: none;
+}
+
+[data-theme="light"] body {
+    background: #eef2f7;
+    color: #1e293b;
+}
+
+[data-theme="light"] .bg-gradient {
+    background: radial-gradient(ellipse at 20% 50%, #dbeafe 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, #e0e7ff 0%, transparent 60%),
+                #eef2f7;
+}
+
+[data-theme="light"] .bg-glow-1 {
+    background: #93c5fd;
+    opacity: 0.2;
+}
+
+[data-theme="light"] .geo-shape {
+    border-color: rgba(71, 85, 105, 0.12);
+}
+
+[data-theme="light"] .main-container {
+    background: rgba(255, 255, 255, 0.78);
+    border-color: rgba(148, 163, 184, 0.28);
+    box-shadow: 0 30px 80px rgba(51, 65, 85, 0.16);
+}
+
+[data-theme="light"] .left-panel {
+    background: rgba(248, 250, 252, 0.86);
+    border-right-color: rgba(148, 163, 184, 0.25);
+}
+
+[data-theme="light"] .client-company-name,
+[data-theme="light"] .auth-header h2,
+[data-theme="light"] .system-info strong,
+[data-theme="light"] .nav-logo,
+[data-theme="light"] .page-header h1,
+[data-theme="light"] .stat-info h3,
+[data-theme="light"] .activity-content p,
+[data-theme="light"] .product-catalog-header h3,
+[data-theme="light"] .pos-cart h3,
+[data-theme="light"] .cart-total strong {
+    color: #1e293b;
+}
+
+[data-theme="light"] .client-company-tag,
+[data-theme="light"] .system-info p,
+[data-theme="light"] .account-status,
+[data-theme="light"] .auth-header p,
+[data-theme="light"] .form-group label,
+[data-theme="light"] .checkbox-wrapper,
+[data-theme="light"] .helper-text,
+[data-theme="light"] .help-note,
+[data-theme="light"] .security-badge,
+[data-theme="light"] .activity-time,
+[data-theme="light"] .page-header p,
+[data-theme="light"] .sidebar-link,
+[data-theme="light"] .loading-spinner,
+[data-theme="light"] .empty-state {
+    color: #64748b;
+}
+
+[data-theme="light"] .input-wrapper input,
+[data-theme="light"] .input-wrapper select,
+[data-theme="light"] .secondary-btn,
+[data-theme="light"] .nav-search,
+[data-theme="light"] .user-btn,
+[data-theme="light"] .product-card,
+[data-theme="light"] .stat-card,
+[data-theme="light"] .recent-activity,
+[data-theme="light"] .pos-products,
+[data-theme="light"] .pos-cart,
+[data-theme="light"] .product-catalog,
+[data-theme="light"] .cart-section,
+[data-theme="light"] .orders-table-container,
+[data-theme="light"] .customers-table-container,
+[data-theme="light"] .audit-table-container,
+[data-theme="light"] .payment-method {
+    background: rgba(255, 255, 255, 0.82);
+    border-color: rgba(148, 163, 184, 0.3);
+    color: #1e293b;
+}
+
+[data-theme="light"] .input-wrapper input::placeholder,
+[data-theme="light"] .nav-search input::placeholder,
+[data-theme="light"] .search-products input::placeholder {
+    color: #94a3b8;
+}
+
+[data-theme="light"] .input-wrapper select option {
+    background: #ffffff;
+    color: #1e293b;
+}
+
+[data-theme="light"] .dashboard-nav {
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom-color: rgba(148, 163, 184, 0.25);
+}
+
+[data-theme="light"] #dashboardContainer {
+    background: #eef2f7;
+}
+
+[data-theme="light"] .sidebar {
+    background: rgba(248, 250, 252, 0.9);
+    border-right-color: rgba(148, 163, 184, 0.25);
+}
+
+[data-theme="light"] .sidebar-link:hover,
+[data-theme="light"] .nav-icon:hover,
+[data-theme="light"] .user-btn:hover,
+[data-theme="light"] .dropdown-item:hover,
+[data-theme="light"] .secondary-btn:hover {
+    background: rgba(226, 232, 240, 0.72);
+}
+
+[data-theme="light"] .sidebar-link.active {
+    background: rgba(79, 70, 229, 0.11);
+    color: #4338ca;
+}
+
+[data-theme="light"] .nav-search input,
+[data-theme="light"] .user-btn,
+[data-theme="light"] .dropdown-item,
+[data-theme="light"] .payment-method,
+[data-theme="light"] .pos-search input,
+[data-theme="light"] .search-products input,
+[data-theme="light"] .cart-total {
+    color: #334155;
+}
+
+[data-theme="light"] .dropdown-menu,
+[data-theme="light"] .modal-card,
+[data-theme="light"] .toast {
+    background: #ffffff;
+    color: #334155;
+    border-color: rgba(148, 163, 184, 0.3);
+    box-shadow: 0 20px 60px rgba(51, 65, 85, 0.18);
+}
+
+[data-theme="light"] .modal-card h2,
+[data-theme="light"] .modal-card p,
+[data-theme="light"] .modal-email {
+    color: #1e293b !important;
+}
+
+[data-theme="light"] .theme-toggle {
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(148, 163, 184, 0.35);
+    color: #334155;
+    box-shadow: 0 10px 30px rgba(51, 65, 85, 0.16);
+}
+
+[data-theme="light"] .theme-toggle .theme-icon-sun {
+    display: none;
+}
+
+[data-theme="light"] .theme-toggle .theme-icon-moon {
+    display: block;
+    color: #4f46e5;
+}
+
+@media (max-width: 480px) {
+    .theme-toggle {
+        width: 38px;
+        height: 38px;
     }
 }
