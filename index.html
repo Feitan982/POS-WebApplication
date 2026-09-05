@@ -1072,13 +1072,6 @@
                     <input type="tel" id="customerPhone" placeholder="Enter phone number">
                 </div>
             </div>
-            <div class="form-group">
-                <label>Email Address</label>
-                <div class="input-wrapper">
-                    <span class="input-icon"><i class="fas fa-envelope"></i></span>
-                    <input type="email" id="customerEmail" placeholder="Enter email address">
-                </div>
-            </div>
         </div>
         
         <div class="payment-methods">
@@ -1106,6 +1099,26 @@
         <button class="submit-btn" id="confirmPaymentBtn" style="width: 100%;">
             <i class="fas fa-check"></i> Complete Payment
         </button>
+    </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="modal-overlay" id="receiptModal">
+    <div class="modal-card receipt-modal-card">
+        <button class="modal-close" id="receiptClose" type="button" aria-label="Close receipt">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-icon receipt-modal-icon">
+            <i class="fas fa-receipt"></i>
+        </div>
+        <h2>Payment Receipt</h2>
+        <div id="receiptContent" class="receipt-content"></div>
+        <div class="receipt-modal-actions">
+            <button class="secondary-btn" id="receiptDoneBtn" type="button">Done</button>
+            <button class="submit-btn" id="printReceiptBtn" type="button">
+                <i class="fas fa-print"></i> Print Receipt
+            </button>
+        </div>
     </div>
 </div>
   

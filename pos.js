@@ -13,10 +13,14 @@
     const productSearch = document.getElementById('productSearch');
     const paymentModal = document.getElementById('paymentModal');
     const paymentClose = document.getElementById('paymentClose');
+    const receiptModal = document.getElementById('receiptModal');
+    const receiptContent = document.getElementById('receiptContent');
+    const receiptClose = document.getElementById('receiptClose');
+    const receiptDoneBtn = document.getElementById('receiptDoneBtn');
+    const printReceiptBtn = document.getElementById('printReceiptBtn');
     const paymentTotal = document.getElementById('paymentTotal');
     const customerName = document.getElementById('customerName');
     const customerPhone = document.getElementById('customerPhone');
-    const customerEmail = document.getElementById('customerEmail');
     const paymentMethods = document.querySelectorAll('.payment-method');
     const cashInputGroup = document.getElementById('cashInputGroup');
     const cashReceived = document.getElementById('cashReceived');
@@ -68,10 +72,10 @@
     }
 
     // --- Helper: show toast (using existing toast container) ---
-    function showToast(message, type = 'success') {
+    function showToast(message, type = 'success', options = {}) {
         const container = document.getElementById('toastContainer');
         const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
+        toast.className = `toast ${type}${options.cartUpdate ? ' cart-toast' : ''}`;
         const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
         toast.innerHTML = `
             <i class="fas ${icon}"></i>
@@ -83,7 +87,7 @@
             toast.style.opacity = '0';
             toast.style.transform = 'translateX(20px)';
             setTimeout(() => toast.remove(), 300);
-        }, 4000);
+        }, options.cartUpdate ? 1600 : 4000);
     }
 
     // --- Get product price from data attribute ---
@@ -297,7 +301,6 @@
             // Clear customer info fields
             if (customerName) customerName.value = '';
             if (customerPhone) customerPhone.value = '';
-            if (customerEmail) customerEmail.value = '';
 
             // Show modal
             paymentModal.classList.add('show');
@@ -319,6 +322,81 @@
             }
         });
     }
+
+    function createReceiptNumber() {
+        const now = new Date();
+        const datePart = [now.getFullYear(), now.getMonth() + 1, now.getDate()]
+            .map(value => String(value).padStart(2, '0')).join('');
+        const timePart = [now.getHours(), now.getMinutes(), now.getSeconds()]
+            .map(value => String(value).padStart(2, '0')).join('');
+        const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        return `REC-${datePart}-${timePart}-${randomPart}`;
+    }
+
+    function showReceipt(receiptNumber, items, subtotal, tax, total, name, phone, paymentMethod, cash, change) {
+        const itemRows = items.map(item => `
+            <div class="receipt-line">
+                <span>${escapeHtml(item.name)} x${item.quantity}</span>
+                <strong>$${(item.price * item.quantity).toFixed(2)}</strong>
+            </div>
+        `).join('');
+        const customer = [name, phone].filter(Boolean).map(escapeHtml).join(' | ');
+        const paymentLabel = paymentMethod === 'card' ? 'Credit/Debit Card' : paymentMethod === 'mobile' ? 'Mobile Payment' : 'Cash';
+
+        receiptContent.innerHTML = `
+            <div class="receipt-store-name">Kirby's Hardware</div>
+            <div class="receipt-heading">POS TRANSACTION</div>
+            <div class="receipt-number">Receipt No: ${escapeHtml(receiptNumber)}</div>
+            <div class="receipt-store-details">
+                <div>Gimeno Bldg, Gungon St</div>
+                <div>Santa Maria, 3022 Bulacan</div>
+                <div>Contact: 0935 491 9766</div>
+            </div>
+            ${customer ? `<div class="receipt-meta">Customer: ${customer}</div>` : ''}
+            <div class="receipt-items">${itemRows}</div>
+            <div class="receipt-total-line"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>
+            <div class="receipt-total-line"><span>Tax (8%)</span><span>$${tax.toFixed(2)}</span></div>
+            <div class="receipt-total-line receipt-grand-total"><strong>Total</strong><strong>$${total.toFixed(2)}</strong></div>
+            <div class="receipt-meta">Payment: ${paymentLabel}</div>
+            ${paymentMethod === 'cash' ? `<div class="receipt-total-line"><span>Cash received</span><span>$${cash.toFixed(2)}</span></div><div class="receipt-total-line"><span>Change</span><span>$${change.toFixed(2)}</span></div>` : ''}
+        `;
+        receiptModal.classList.add('show');
+    }
+
+    function printReceipt() {
+        const printWindow = window.open('', '_blank', 'width=420,height=700');
+        if (!printWindow) {
+            showToast('Allow pop-ups to print the receipt', 'error');
+            return;
+        }
+        printWindow.document.write(`<!doctype html><html><head><title>POS Receipt</title><style>
+            body { font-family: Arial, sans-serif; width: 300px; margin: 20px auto; color: #111; }
+            h1 { font-size: 18px; text-align: center; margin: 0 0 16px; }
+            .receipt-line, .receipt-total-line { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0; }
+            .receipt-items { border-top: 1px dashed #999; border-bottom: 1px dashed #999; padding: 8px 0; margin: 12px 0; }
+            .receipt-grand-total { border-top: 1px solid #111; padding-top: 8px; font-size: 16px; }
+            .receipt-meta { font-size: 12px; margin: 8px 0; }
+            .receipt-heading, .receipt-store-name, .receipt-store-details { text-align: center; }
+            .receipt-store-name { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
+            .receipt-heading { font-weight: bold; margin-bottom: 4px; }
+            .receipt-store-details { font-size: 11px; line-height: 1.5; margin-bottom: 12px; }
+        </style></head><body>${receiptContent.innerHTML}</body></html>`);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+    }
+
+    [receiptClose, receiptDoneBtn].forEach(button => {
+        if (button) button.addEventListener('click', () => receiptModal.classList.remove('show'));
+    });
+
+    if (receiptModal) {
+        receiptModal.addEventListener('click', event => {
+            if (event.target === receiptModal) receiptModal.classList.remove('show');
+        });
+    }
+
+    if (printReceiptBtn) printReceiptBtn.addEventListener('click', printReceipt);
 
     // --- Payment method selection ---
     paymentMethods.forEach(method => {
@@ -355,15 +433,23 @@
             const total = parseFloat(totalText) || 0;
             const name = customerName ? customerName.value.trim() : '';
             const phone = customerPhone ? customerPhone.value.trim() : '';
-            const email = customerEmail ? customerEmail.value.trim() : '';
+            const items = Object.entries(cart).map(([itemName, quantity]) => ({
+                name: itemName,
+                quantity,
+                price: getProductPriceByName(itemName)
+            }));
+            const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const tax = subtotal * 0.08;
+            const receiptNumber = createReceiptNumber();
+            let cash = 0;
+            let change = 0;
 
             if (selectedPaymentMethod === 'cash') {
-                const cash = parseFloat(cashReceived.value) || 0;
+                cash = parseFloat(cashReceived.value) || 0;
                 if (cash < total) {
                     showToast('Insufficient cash amount', 'error');
                     return;
                 }
-                const change = cash - total;
                 let message = `Payment successful! Change: ${formatCurrency(change)}`;
                 if (name) message += ` | Customer: ${name}`;
                 showToast(message, 'success');
@@ -379,6 +465,7 @@
             cart = {};
             updateCartDisplay();
             paymentModal.classList.remove('show');
+            showReceipt(receiptNumber, items, subtotal, tax, total, name, phone, selectedPaymentMethod, cash, change);
         });
     }
 

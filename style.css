@@ -58,31 +58,45 @@ body {
     left: -200px;
 }
 
-/* ===== TOAST ===== */
+/* ===== make in input.css minimize the size of payment formST ===== */
 .toast-container {
     position: fixed;
-    top: 20px;
+    bottom: 20px;
     right: 20px;
     z-index: 9999;
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     gap: 10px;
-    max-width: 400px;
-    width: 100%;
+    max-width: min(320px, calc(100vw - 40px));
+    width: auto;
+    pointer-events: none;
 }
 
 .toast {
     background: #1e293b;
     color: #e2e8f0;
-    padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    border-left: 4px solid #4f46e5;
+    padding: 10px 12px;
+    border-radius: 9px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    border-left: 3px solid #4f46e5;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    width: min(100%, 320px);
+    font-size: 0.82rem;
     animation: slideIn 0.3s ease;
     backdrop-filter: blur(12px);
+    pointer-events: auto;
+}
+
+.toast.cart-toast {
+    width: auto;
+    max-width: 260px;
+    padding: 7px 10px;
+    border-left-color: #22c55e;
+    font-size: 0.75rem;
+    opacity: 0.9;
 }
 
 .toast.error {
@@ -94,7 +108,7 @@ body {
 }
 
 .toast i {
-    font-size: 20px;
+    font-size: 15px;
 }
 
 .toast .toast-close {
@@ -103,7 +117,23 @@ body {
     border: none;
     color: #94a3b8;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
+}
+
+@media (max-width: 480px) {
+    .toast-container {
+        right: 12px;
+        bottom: 12px;
+        max-width: calc(100vw - 24px);
+    }
+
+    .toast {
+        max-width: 250px;
+    }
+
+    .toast.cart-toast {
+        max-width: 210px;
+    }
 }
 
 @keyframes slideIn {
@@ -2954,5 +2984,185 @@ body {
     .theme-toggle {
         width: 38px;
         height: 38px;
+    }
+}
+
+/* Keep the payment form usable when its content is taller than the viewport. */
+#paymentModal {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+#paymentModal .modal-card {
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(129, 140, 248, 0.65) transparent;
+}
+
+#paymentModal .modal-card::-webkit-scrollbar {
+    width: 6px;
+}
+
+#paymentModal .modal-card::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#paymentModal .modal-card::-webkit-scrollbar-thumb {
+    background: rgba(129, 140, 248, 0.65);
+    border-radius: 999px;
+}
+
+@media (max-width: 480px) {
+    #paymentModal {
+        align-items: flex-start;
+        padding: 12px;
+    }
+
+    #paymentModal .modal-card {
+        max-height: calc(100dvh - 24px);
+        padding: 28px 18px 20px;
+    }
+
+    #paymentModal .modal-icon {
+        width: 52px;
+        height: 52px;
+        margin-bottom: 12px;
+        font-size: 22px;
+    }
+
+    #paymentModal .modal-card h2 {
+        font-size: 20px;
+    }
+
+    #paymentModal .modal-card > p {
+        margin-bottom: 0;
+    }
+
+    #paymentModal .modal-card > div[style*="text-align: left"] {
+        margin: 1rem 0;
+    }
+
+    #paymentModal .form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    #paymentModal .payment-method {
+        padding: 10px 12px;
+    }
+}
+
+.receipt-modal-card {
+    max-width: 420px;
+}
+
+.receipt-modal-icon {
+    background: rgba(34, 197, 94, 0.14);
+    color: #4ade80;
+}
+
+.receipt-content {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.45);
+    border: 1px dashed rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+.receipt-heading {
+    margin-bottom: 0.75rem;
+    color: #f8fafc;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.08em;
+}
+
+.receipt-number {
+    margin-bottom: 0.75rem;
+    color: #cbd5e1;
+    font-family: monospace;
+    font-size: 0.75rem;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.receipt-store-name {
+    margin-bottom: 0.25rem;
+    color: #f8fafc;
+    font-size: 1.15rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.receipt-store-details {
+    margin-bottom: 0.85rem;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.receipt-meta {
+    margin: 0.5rem 0;
+    color: #94a3b8;
+}
+
+.receipt-items {
+    padding: 0.5rem 0;
+    border-top: 1px dashed rgba(255, 255, 255, 0.16);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.16);
+}
+
+.receipt-line,
+.receipt-total-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0.45rem 0;
+    color: #cbd5e1;
+}
+
+.receipt-grand-total {
+    margin-top: 0.7rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    color: #f8fafc;
+    font-size: 1rem;
+}
+
+.receipt-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.receipt-modal-actions button {
+    flex: 1;
+}
+
+@media (max-width: 480px) {
+    .receipt-modal-card {
+        max-width: calc(100vw - 24px);
+    }
+
+    .receipt-content {
+        padding: 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .receipt-store-name {
+        font-size: 1rem;
+    }
+
+    .receipt-line,
+    .receipt-total-line {
+        gap: 0.5rem;
+    }
+
+    .receipt-modal-actions {
+        flex-direction: column-reverse;
     }
 }

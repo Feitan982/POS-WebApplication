@@ -158,47 +158,98 @@
     @apply bg-red-500/10 border-red-500;
 }
 
-/* ===== PAYMENT MODAL - MINIMIZED ===== */
+/* ===== PAYMENT MODAL - MINIMIZED & PROFESSIONAL ===== */
 .modal-overlay {
-    @apply hidden fixed inset-0 z-[10000] items-center justify-center p-3 bg-slate-900/70 backdrop-blur-sm;
+    @apply hidden fixed inset-0 z-[10000] items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm;
+    /* Prevent background scroll */
+    overflow: hidden;
 }
 
 .modal-overlay.show {
     @apply flex;
 }
 
+/* Payment Modal Container - Compact & Centered */
 .payment-modal-content {
-    @apply bg-slate-800/95 backdrop-blur-md border border-white/10 rounded-xl p-4 max-w-xs w-full max-h-[80vh] overflow-y-auto;
+    @apply bg-slate-800/95 backdrop-blur-md border border-white/10 rounded-2xl w-full max-w-[400px] max-h-[85vh] overflow-y-auto shadow-2xl;
+    /* Custom scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(79, 70, 229, 0.4) transparent;
 }
 
-.payment-modal-content h2 {
-    @apply text-lg font-bold text-slate-100 mb-0.5;
+/* Scrollbar for Webkit browsers (Chrome, Safari, Edge) */
+.payment-modal-content::-webkit-scrollbar {
+    width: 5px;
 }
 
-.payment-modal-content .subtitle {
-    @apply text-[11px] text-slate-400 mb-2;
+.payment-modal-content::-webkit-scrollbar-track {
+    @apply bg-transparent;
+    border-radius: 10px;
 }
 
-/* Buyer Name - COMPACT */
+.payment-modal-content::-webkit-scrollbar-thumb {
+    @apply bg-indigo-500/40 rounded-full;
+}
+
+.payment-modal-content::-webkit-scrollbar-thumb:hover {
+    @apply bg-indigo-500/60;
+}
+
+/* Modal Inner Content - Proper Spacing */
+.payment-modal-inner {
+    @apply p-5;
+}
+
+/* Modal Header - Sticky for Accessibility */
+.payment-modal-header {
+    @apply sticky top-0 z-10 bg-slate-800/95 backdrop-blur-md -mx-5 px-5 pt-5 pb-3 border-b border-white/5;
+}
+
+.payment-modal-header h2 {
+    @apply text-xl font-bold text-slate-100 flex items-center gap-2.5;
+}
+
+.payment-modal-header .subtitle {
+    @apply text-xs text-slate-400 mt-0.5;
+}
+
+/* Modal Body - Scrollable Content */
+.payment-modal-body {
+    @apply py-3;
+}
+
+/* Modal Footer - Sticky for Accessibility */
+.payment-modal-footer {
+    @apply sticky bottom-0 z-10 bg-slate-800/95 backdrop-blur-md -mx-5 px-5 pb-5 pt-3 border-t border-white/5;
+}
+
+/* ===== PAYMENT FORM FIELDS - COMPACT ===== */
+
+/* Buyer Name - Compact */
 .buyer-name-group {
-    @apply mb-2;
+    @apply mb-3;
 }
 
 .buyer-name-group label {
-    @apply block text-[10px] font-medium text-slate-300 mb-0.5 uppercase tracking-wider;
+    @apply block text-xs font-medium text-slate-300 mb-1 uppercase tracking-wider;
 }
 
 .buyer-name-group input {
-    @apply w-full px-2.5 py-1 bg-slate-900/50 border border-white/10 rounded-lg text-slate-200 text-xs placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20;
+    @apply w-full px-3.5 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-slate-200 text-sm placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20;
 }
 
-/* Payment Methods - COMPACT GRID */
+/* Section Label */
+.section-label {
+    @apply text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block;
+}
+
+/* Payment Methods - Compact Grid */
 .payment-methods {
-    @apply grid grid-cols-2 gap-1 my-2;
+    @apply grid grid-cols-2 gap-1.5 mb-3;
 }
 
 .payment-method {
-    @apply p-1.5 px-2.5 border-2 border-white/8 rounded-lg cursor-pointer transition-all duration-300 flex items-center gap-1.5 text-slate-200 bg-white/5 text-[11px] w-full;
+    @apply p-2.5 px-3 border-2 border-white/8 rounded-lg cursor-pointer transition-all duration-300 flex items-center gap-2 text-slate-200 bg-white/5 text-xs w-full;
     font-family: inherit;
 }
 
@@ -215,50 +266,59 @@
 }
 
 .payment-method span {
-    @apply text-[11px];
+    @apply text-xs font-medium;
 }
 
-/* Cash Input - COMPACT */
+/* Cash Input - Compact */
 #cashInputGroup {
-    @apply my-2;
+    @apply mb-3;
 }
 
 #cashInputGroup label {
-    @apply block text-[10px] font-medium text-slate-300 mb-0.5 uppercase tracking-wider;
+    @apply block text-xs font-medium text-slate-300 mb-1 uppercase tracking-wider;
 }
 
 #cashInputGroup input {
-    @apply w-full px-2.5 py-1 bg-slate-900/50 border border-white/10 rounded-lg text-slate-200 text-xs placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20;
+    @apply w-full px-3.5 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-slate-200 text-sm placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20;
+}
+
+/* Change Amount Display */
+.change-display {
+    @apply flex items-center justify-between bg-slate-900/30 rounded-lg px-3.5 py-2 mb-3;
+}
+
+.change-display label {
+    @apply text-xs font-medium text-slate-300 uppercase tracking-wider;
 }
 
 #changeAmount {
-    @apply text-green-400 font-semibold text-sm;
+    @apply text-green-400 font-semibold text-base;
 }
 
-/* Payment Summary - COMPACT */
+/* Payment Summary - Compact */
 .payment-summary {
-    @apply bg-slate-900/30 rounded-lg p-2 my-2;
+    @apply bg-slate-900/30 rounded-lg p-3 mb-3;
 }
 
 .payment-summary .summary-row {
-    @apply flex justify-between text-[11px] py-0.5;
+    @apply flex justify-between text-xs py-1;
 }
 
 .payment-summary .summary-row.total {
-    @apply text-sm font-bold text-slate-100 border-t border-white/5 pt-1 mt-0.5;
+    @apply text-sm font-bold text-slate-100 border-t border-white/5 pt-2 mt-1;
 }
 
 .payment-summary .summary-row.total span:last-child {
     @apply text-indigo-300;
 }
 
-/* Payment Actions - COMPACT */
+/* Payment Actions - Compact */
 .payment-actions {
-    @apply flex gap-1.5 mt-2.5;
+    @apply flex gap-2;
 }
 
 .payment-actions button {
-    @apply flex-1 py-1.5 px-2.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer text-xs;
+    @apply flex-1 py-2.5 px-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer text-sm;
     font-family: inherit;
 }
 
@@ -268,125 +328,6 @@
 
 .payment-actions .btn-confirm {
     @apply bg-gradient-to-br from-indigo-600 to-purple-600 text-white hover:shadow-[0_8px_25px_rgba(79,70,229,0.3)] hover:-translate-y-0.5;
-}
-
-/* ===== PROFESSIONAL NOTIFICATION SYSTEM ===== */
-.notification-container {
-    @apply fixed top-4 right-4 z-[99999] flex flex-col gap-2 max-w-sm w-full pointer-events-none;
-}
-
-.notification {
-    @apply pointer-events-auto bg-slate-800/95 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-2xl transform translate-x-full transition-all duration-500 ease-out;
-    animation: slideIn 0.5s ease-out forwards;
-}
-
-.notification.success {
-    @apply border-emerald-500/30 bg-emerald-900/20;
-}
-
-.notification.error {
-    @apply border-red-500/30 bg-red-900/20;
-}
-
-.notification.info {
-    @apply border-blue-500/30 bg-blue-900/20;
-}
-
-.notification.warning {
-    @apply border-yellow-500/30 bg-yellow-900/20;
-}
-
-.notification-content {
-    @apply flex items-start gap-3;
-}
-
-.notification-icon {
-    @apply flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-lg;
-}
-
-.notification.success .notification-icon {
-    @apply bg-emerald-500/20 text-emerald-400;
-}
-
-.notification.error .notification-icon {
-    @apply bg-red-500/20 text-red-400;
-}
-
-.notification.info .notification-icon {
-    @apply bg-blue-500/20 text-blue-400;
-}
-
-.notification.warning .notification-icon {
-    @apply bg-yellow-500/20 text-yellow-400;
-}
-
-.notification-body {
-    @apply flex-1 min-w-0;
-}
-
-.notification-title {
-    @apply text-sm font-semibold text-slate-100;
-}
-
-.notification-message {
-    @apply text-xs text-slate-400 mt-0.5;
-}
-
-.notification-time {
-    @apply text-[10px] text-slate-500 mt-1;
-}
-
-.notification-close {
-    @apply flex-shrink-0 bg-white/5 hover:bg-white/10 rounded-lg p-1 cursor-pointer transition-all duration-200 text-slate-400 hover:text-slate-200;
-}
-
-.notification.progress {
-    @apply border-indigo-500/30 bg-indigo-900/20;
-}
-
-.notification.progress .notification-icon {
-    @apply bg-indigo-500/20 text-indigo-400;
-}
-
-.notification-progress-bar {
-    @apply w-full h-1 bg-slate-700/50 rounded-full mt-2 overflow-hidden;
-}
-
-.notification-progress-bar .progress-fill {
-    @apply h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-1000;
-    width: 0%;
-}
-
-/* Notification Animations */
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes slideOut {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-}
-
-.notification.slide-out {
-    animation: slideOut 0.4s ease-in forwards;
-}
-
-/* Notification Badge (for cart updates) */
-.notification-badge {
-    @apply inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-indigo-600 rounded-full;
 }
 
 /* ===== RECEIPT STYLES ===== */
@@ -491,7 +432,9 @@
     @apply bg-slate-200 text-slate-700 hover:bg-slate-300 flex items-center justify-center gap-1.5;
 }
 
-/* Responsive adjustments */
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+/* Tablet and below */
 @media (max-width: 1200px) {
     .pos-layout {
         @apply grid-cols-1;
@@ -506,35 +449,155 @@
     }
 }
 
+/* Mobile devices */
 @media (max-width: 768px) {
     .product-grid {
         @apply grid-cols-[repeat(auto-fill,minmax(120px,1fr))];
     }
-    
+
+    /* Payment Modal Mobile */
     .payment-modal-content {
-        @apply p-3 max-w-full mx-2;
+        @apply max-w-full mx-3 max-h-[90vh];
+        width: calc(100% - 24px);
     }
-    
+
+    .payment-modal-inner {
+        @apply p-4;
+    }
+
+    .payment-modal-header {
+        @apply -mx-4 px-4 pt-4 pb-2.5;
+    }
+
+    .payment-modal-footer {
+        @apply -mx-4 px-4 pb-4 pt-2.5;
+    }
+
     .payment-methods {
         @apply grid-cols-2 gap-1;
     }
-    
+
+    .payment-actions {
+        @apply flex-col gap-1.5;
+    }
+
+    .payment-actions button {
+        @apply py-2.5;
+    }
+
     .receipt-container {
         @apply p-4;
     }
     
-    .payment-actions,
     .receipt-actions {
         @apply flex-col gap-1.5;
     }
-    
-    .notification-container {
-        @apply top-2 right-2 left-2 max-w-none;
-    }
 }
 
+/* Small mobile devices */
 @media (max-width: 480px) {
     .payment-methods {
         @apply grid-cols-1;
     }
+
+
+    .payment-modal-content {
+        @apply max-h-[92vh];
+        width: calc(100% - 16px);
+        margin: 0 8px;
+    }
+
+    .payment-modal-inner {
+        @apply p-3;
+    }
+
+    .payment-modal-header h2 {
+        @apply text-lg;
+    }
+}
+
+/* Compact payment form used by the current payment modal */
+.modal-card {
+    @apply p-4 max-w-sm max-h-[calc(100vh-2rem)] overflow-y-auto overscroll-contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(79, 70, 229, 0.45) transparent;
+}
+
+.modal-card::-webkit-scrollbar {
+    width: 5px;
+}
+
+.modal-card::-webkit-scrollbar-track {
+    @apply bg-transparent;
+}
+
+.modal-card::-webkit-scrollbar-thumb {
+    @apply bg-indigo-500/40 rounded-full;
+}
+
+.modal-card .modal-icon {
+    @apply mb-2 text-3xl;
+}
+
+.modal-card h2 {
+    @apply text-xl mb-1;
+}
+
+.modal-card > p {
+    @apply text-sm mb-3;
+}
+
+.modal-card > div[style*="text-align: left"] {
+    @apply my-3;
+}
+
+.modal-card > div[style*="text-align: left"] h3 {
+    @apply text-sm mb-2;
+}
+
+.modal-card .form-group {
+    @apply mb-2;
+}
+
+.modal-card .form-group label {
+    @apply text-xs mb-1;
+}
+
+.modal-card .input-wrapper input {
+    @apply px-2.5 py-1.5 text-sm;
+}
+
+.modal-card .payment-methods {
+    @apply gap-1 mb-2;
+}
+
+.modal-card .payment-method {
+    @apply p-1.5 px-2 text-[11px] gap-1.5;
+}
+
+.modal-card #cashInputGroup {
+    @apply mb-2;
+}
+
+.modal-card #cashInputGroup p {
+    @apply mt-1 text-xs;
+}
+
+.modal-card #confirmPaymentBtn {
+    @apply py-2 text-sm;
+}
+
+@media (max-width: 480px) {
+    .modal-overlay {
+        @apply p-2;
+    }
+
+    .modal-card {
+        @apply p-3 max-w-[calc(100vw-1rem)] max-h-[calc(100vh-1rem)];
+    }
+}
+
+/* Ensure backdrop doesn't scroll */
+body.modal-open {
+    @apply overflow-hidden;
 }
