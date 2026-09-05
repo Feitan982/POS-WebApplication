@@ -26,6 +26,7 @@
     // --- State ---
     let cart = {};          // { productName: quantity }
     let selectedPaymentMethod = 'cash';
+    const formatCurrency = value => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(Number(value) || 0);
 
     function renderProductCatalog(products) {
         if (!productGrid) return;
@@ -39,7 +40,7 @@
                 <i class="fas ${categoryIcons[product.category] || 'fa-box'}"></i>
                 <p>${product.name}</p>
                 ${product.size ? `<small>Size: ${product.size}</small>` : ''}
-                <strong>$${Number(product.price).toFixed(2)}</strong>
+                <strong>${formatCurrency(product.price)}</strong>
             </div>`;
         }).join('');
     }
@@ -144,7 +145,7 @@
                 itemDiv.innerHTML = `
                     <div class="cart-item-info">
                         <span class="cart-item-name">${displayName}</span>
-                        <span class="cart-item-qty">$${price.toFixed(2)} each</span>
+                        <span class="cart-item-qty">${formatCurrency(price)} each</span>
                     </div>
                     <div class="cart-item-actions">
                         <button class="qty-btn" data-action="decrease" data-cart-key="${cartKey}">
@@ -155,7 +156,7 @@
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
-                    <strong style="min-width: 80px; text-align: right;">$${(price * qty).toFixed(2)}</strong>
+                    <strong style="min-width: 80px; text-align: right;">${formatCurrency(price * qty)}</strong>
                 `;
                 cartItems.appendChild(itemDiv);
             }
@@ -171,9 +172,9 @@
         const tax = subtotal * 0.08;
         const total = subtotal + tax;
 
-        subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
-        taxEl.textContent = `$${tax.toFixed(2)}`;
-        totalEl.textContent = `$${total.toFixed(2)}`;
+        subtotalEl.textContent = formatCurrency(subtotal);
+        taxEl.textContent = formatCurrency(tax);
+        totalEl.textContent = formatCurrency(total);
     }
 
     function getProductPriceByName(name) {
@@ -266,7 +267,7 @@
             const total = subtotal + tax;
 
             // Set modal total
-            if (paymentTotal) paymentTotal.textContent = `$${total.toFixed(2)}`;
+            if (paymentTotal) paymentTotal.textContent = formatCurrency(total);
 
             // Reset payment method to cash (default)
             selectedPaymentMethod = 'cash';
@@ -274,7 +275,7 @@
             document.querySelector('.payment-method[data-method="cash"]').classList.add('selected');
             if (cashInputGroup) cashInputGroup.style.display = 'block';
             if (cashReceived) cashReceived.value = '';
-            if (changeAmount) changeAmount.textContent = '$0.00';
+            if (changeAmount) changeAmount.textContent = formatCurrency(0);
 
             // Clear customer info fields
             if (customerName) customerName.value = '';
@@ -321,11 +322,11 @@
         cashReceived.addEventListener('input', (e) => {
             const cash = parseFloat(e.target.value) || 0;
             // Get total from modal
-            const totalText = paymentTotal.textContent.replace('$', '');
+            const totalText = paymentTotal.textContent.replace(/[^\d.-]/g, '');
             const total = parseFloat(totalText) || 0;
             const change = cash - total;
             if (changeAmount) {
-                changeAmount.textContent = change >= 0 ? `$${change.toFixed(2)}` : 'Insufficient amount';
+                changeAmount.textContent = change >= 0 ? formatCurrency(change) : 'Insufficient amount';
             }
         });
     }
@@ -333,7 +334,7 @@
     // --- Confirm payment ---
     if (confirmPaymentBtn) {
         confirmPaymentBtn.addEventListener('click', () => {
-            const totalText = paymentTotal.textContent.replace('$', '');
+            const totalText = paymentTotal.textContent.replace(/[^\d.-]/g, '');
             const total = parseFloat(totalText) || 0;
             const name = customerName ? customerName.value.trim() : '';
             const phone = customerPhone ? customerPhone.value.trim() : '';
@@ -346,7 +347,7 @@
                     return;
                 }
                 const change = cash - total;
-                let message = `Payment successful! Change: $${change.toFixed(2)}`;
+                let message = `Payment successful! Change: ${formatCurrency(change)}`;
                 if (name) message += ` | Customer: ${name}`;
                 showToast(message, 'success');
             } else {

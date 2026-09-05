@@ -14,6 +14,7 @@
     };
 
     const supabaseApi = window.POS_SUPABASE;
+    const formatCurrency = value => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(Number(value) || 0);
 
     function mapProduct(product) {
         return {
@@ -104,7 +105,7 @@
                 const sizeLabel = product.size ? `<span class="product-sku">Size: ${product.size}</span>` : '';
                 return `<tr>
                     <td><div class="product-info"><div class="product-image"><i class="fas ${categoryIcons[product.category] || 'fa-box'}"></i></div><div class="product-details"><p class="product-name">${product.name}</p>${sizeLabel}<span class="product-sku">SKU: ${product.sku}</span></div></div></td>
-                    <td>${product.category}</td><td>$${Number(product.price).toFixed(2)}</td>
+                    <td>${product.category}</td><td>${formatCurrency(product.price)}</td>
                     <td><input type="number" class="quantity-input" value="${product.quantity}" min="0" data-product-id="${product.id}" onchange="updateQuantity(${product.id}, this.value)"></td>
                     <td>${getStockBadge(status)}</td><td>${product.lastUpdated}</td>
                     <td><div class="action-buttons"><button class="btn-icon edit" type="button" onclick="editProduct(${product.id})" title="Edit"><i class="fas fa-edit"></i></button><button class="btn-icon delete" type="button" onclick="showDeleteModal(${product.id})" title="Delete"><i class="fas fa-trash"></i></button></div></td>
